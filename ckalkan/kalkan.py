@@ -2,11 +2,15 @@ from .dl_open import LibHandle, get_handle
 
 
 class KCCLient:
+    """
+    Логика вызова методов из библиотеки
+    """
+
     def __init__(self, handle: LibHandle):
         self.handler = handle
 
-    def init(self) -> int:
-        status = self.handler.init()
+    def kc_init(self) -> int:
+        status = self.handler.kc_init()
         return status
 
     def load_key_store(self, path: str, password: str) -> int:

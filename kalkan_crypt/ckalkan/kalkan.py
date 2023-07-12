@@ -12,7 +12,10 @@ class KCCLient:
         return status
 
     def load_key_store(self, path: str, password: str) -> int:
-        return self.handler.load_key_store(path, password)
+        return self.handler.kc_load_key_store(path, password)
+
+    def finalize(self):
+        self.handler.kc_finalize()
 
 
 def new_kc_client(lib: str) -> KCCLient:

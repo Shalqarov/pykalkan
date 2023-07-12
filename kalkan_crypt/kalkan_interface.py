@@ -6,8 +6,12 @@ class KalkanInterface(ABC):
 
     @abstractmethod
     def init(self) -> int:
-        pass
+        ...
 
     @abstractmethod
     def load_key_store(self, cert_path: str, cert_password: str) -> int:
-        pass
+        ...
+
+    @abstractmethod
+    def finalize(self):
+        ...

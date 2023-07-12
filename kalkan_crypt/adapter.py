@@ -12,6 +12,9 @@ class Client(KalkanInterface):
     def load_key_store(self, cert_path: str, cert_password: str) -> int:
         return self._kc.load_key_store(cert_path, cert_password)
 
+    def finalize(self):
+        self._kc.finalize()
+
 
 def new_client(lib: str) -> Client:
     try:

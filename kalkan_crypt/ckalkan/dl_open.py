@@ -17,7 +17,7 @@ class LibHandle:
         self.handle.KC_GetFunctionList()
         return self.handle.Init()
 
-    def load_key_store(
+    def kc_load_key_store(
             self, path: str, password: str, store_type=1, alias: str = ""
     ) -> int:
         """
@@ -40,6 +40,10 @@ class LibHandle:
             ctypes.c_int(len(path)),
             c_alias,
         )
+
+    def kc_finalize(self):
+        """ Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки. """
+        self.handle.KC_Finalize()
 
 
 def get_handle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:

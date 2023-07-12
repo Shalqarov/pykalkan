@@ -2,9 +2,7 @@ import ctypes
 
 
 class LibHandle:
-    """
-    Хендлер для работы с библиотекой ключей
-    """
+    """ Хендлер для работы с библиотекой ключей """
 
     def __init__(self, handle, lib_name):
         self.handle = handle

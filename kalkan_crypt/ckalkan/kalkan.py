@@ -2,9 +2,7 @@ from .dl_open import LibHandle, get_handle
 
 
 class KCCLient:
-    """
-    Логика вызова методов из библиотеки
-    """
+    """ Логика вызова методов из библиотеки """
 
     def __init__(self, handle: LibHandle):
         self.handler = handle

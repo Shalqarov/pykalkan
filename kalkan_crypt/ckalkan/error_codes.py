@@ -1,6 +1,10 @@
 from typing import Final
 
 
+def wrap_error(code: int) -> str:
+    return ErrorCode(code).__str__()
+
+
 class ErrorCode:
     def __init__(self, code: int):
         self.code = code

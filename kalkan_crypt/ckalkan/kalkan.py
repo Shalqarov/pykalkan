@@ -20,6 +20,9 @@ class KCCLient:
     def x509_export_certificate_from_store(self):
         return self.handler.x509_export_certificate_from_store()
 
+    def verify_data(self, signature):
+        return self.handler.verify_data(signature)
+
 
 def new_kc_client(lib: str) -> KCCLient:
     try:

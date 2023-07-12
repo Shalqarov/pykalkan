@@ -19,3 +19,7 @@ class KalkanInterface(ABC):
     @abstractmethod
     def x509_export_certificate_from_store(self):
         ...
+
+    @abstractmethod
+    def verify_data(self, signature):
+        ...

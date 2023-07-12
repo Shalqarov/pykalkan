@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class KalkanInterface(ABC):
-    """ Методы которые нужно реализовать """
+    """ Методы которые нужно реализовать в клиенте """
 
     @abstractmethod
     def init(self) -> int:
@@ -14,4 +14,8 @@ class KalkanInterface(ABC):
 
     @abstractmethod
     def finalize(self):
+        ...
+
+    @abstractmethod
+    def x509_export_certificate_from_store(self):
         ...

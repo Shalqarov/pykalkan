@@ -17,6 +17,9 @@ class KCCLient:
     def finalize(self):
         self.handler.kc_finalize()
 
+    def x509_export_certificate_from_store(self):
+        return self.handler.x509_export_certificate_from_store()
+
 
 def new_kc_client(lib: str) -> KCCLient:
     try:

@@ -12,7 +12,7 @@ class ErrorCode:
     def __str__(self) -> str:
         if self.code in error_labels:
             return error_labels[self.code]
-        return "Неизвестный код ошибки"
+        return f"Неизвестный код ошибки: {self.code}"
 
 
 ERROR_CODE_OK: Final[ErrorCode] = ErrorCode(0)  # Нет ошибки

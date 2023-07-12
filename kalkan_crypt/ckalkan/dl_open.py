@@ -7,6 +7,7 @@ class LibHandle:
     def __init__(self, handle, lib_name):
         self.handle = handle
         self.lib_name = lib_name
+        self._alias = ctypes.create_string_buffer(''.encode())
 
     def kc_init(self) -> int:
         """
@@ -44,6 +45,23 @@ class LibHandle:
     def kc_finalize(self):
         """ Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки. """
         self.handle.KC_Finalize()
+
+    def x509_export_certificate_from_store(self):
+        flags = ctypes.c_int(1)
+        cert_len = ctypes.pointer(ctypes.c_int(32768))
+        public_cert = ctypes.create_string_buffer(32768)
+        status_code = self.handle.X509ExportCertificateFromStore(
+            self._alias,
+            flags,
+            public_cert,
+            cert_len,
+        )
+        if status_code != 0:
+            raise Exception(status_code)
+        public_cert = public_cert.value.decode().replace('-----BEGIN CERTIFICATE-----', '')
+        public_cert = public_cert.replace('-----END CERTIFICATE-----', '')
+        public_cert = public_cert.replace('\n', '')
+        return public_cert
 
 
 def get_handle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:

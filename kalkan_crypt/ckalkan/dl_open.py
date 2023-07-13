@@ -83,8 +83,11 @@ class LibHandle:
         :return: Подпись
         """
         flags = ct.c_int(sum([flag for flag in flags]))
+
         data_to_sign = ct.create_string_buffer(data)
+        
         signed_data = ct.create_string_buffer(len(data_to_sign) * 2 + 50000)
+
         status_code = self.handle.SignData(
             self._alias,
             flags,
@@ -103,15 +106,21 @@ class LibHandle:
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """
         alias = self._alias
+
         flags = ct.c_int(sum([flag for flag in flags]))
+
         data = ct.c_char_p(in_data.encode())
         data_length = ct.c_int(len(in_data))
+
         inout_sign_length = ct.c_int(len(in_sign))
         inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign.encode())
+
         out_data = ct.create_string_buffer(OUT_DATA_LENGTH)
         out_data_length = ct.byref(ct.c_int(OUT_DATA_LENGTH))
+
         out_verify_info = ct.create_string_buffer(OUT_VERIFY_INFO_LENGTH)
         out_verify_info_length = ct.byref(ct.c_int(OUT_VERIFY_INFO_LENGTH))
+
         cert_id = ct.c_int(0)
         out_cert = ct.create_string_buffer(OUT_CERT_LENGTH)
         out_cert_length = ct.byref(ct.c_int(OUT_CERT_LENGTH))

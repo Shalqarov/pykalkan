@@ -85,7 +85,7 @@ class LibHandle:
         flags = ct.c_int(sum([flag for flag in flags]))
 
         data_to_sign = ct.create_string_buffer(data)
-        
+
         signed_data = ct.create_string_buffer(len(data_to_sign) * 2 + 50000)
 
         status_code = self.handle.SignData(
@@ -100,9 +100,9 @@ class LibHandle:
         )
         return status_code, signed_data.value
 
-    def verify_data(self, in_sign: str, in_data: str = "",
+    def verify_data(self, in_sign: str, in_data: str = "SGVsbG8sIFdvcmxkIQ==",
                     flags: t.Iterable[SignatureFlag] = (
-                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64)) -> \
+                            SignatureFlag.KC_SIGN_DRAFT, SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64)) -> \
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """
         alias = self._alias

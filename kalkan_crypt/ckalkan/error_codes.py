@@ -1,5 +1,5 @@
 def wrap_error(code: int) -> str:
-    return errorLabels[code]
+    return errorLabels.get(code, f"Неизвестная ошибка: {code}")
 
 
 class ErrorCode:

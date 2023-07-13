@@ -102,7 +102,7 @@ class LibHandle:
 
     def verify_data(self, in_sign: str, in_data: str = "SGVsbG8sIFdvcmxkIQ==",
                     flags: t.Iterable[SignatureFlag] = (
-                            SignatureFlag.KC_SIGN_DRAFT, SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64)) -> \
+                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64,)) -> \
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """
         alias = self._alias

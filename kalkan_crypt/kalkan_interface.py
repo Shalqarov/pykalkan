@@ -21,5 +21,9 @@ class KalkanInterface(ABC):
         ...
 
     @abstractmethod
+    def sign_data(self, data: str):
+        ...
+
+    @abstractmethod
     def verify_data(self, signature):
         ...

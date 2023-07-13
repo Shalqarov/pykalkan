@@ -1,0 +1,29 @@
+from enum import IntEnum
+
+
+class StorageType(IntEnum):
+    KCST_PKCS12 = 0x1
+    KCST_KZIDCARD = 0x2
+    KCST_KAZTOKEN = 0x4
+    KCST_ETOKEN72K = 0x8
+    KCST_JACARTA = 0x10
+    KCST_X509CERT = 0x20
+    KCST_AKEY = 0x40
+
+
+class SignatureFlag(IntEnum):
+    KC_SIGN_DRAFT = 0x1
+    KC_SIGN_CMS = 0x2
+    KC_IN_PEM = 0x4
+    KC_IN_DER = 0x8
+    KC_IN_BASE64 = 0x10
+    KC_IN2_BASE64 = 0x20
+    KC_DETACHED_DATA = 0x40
+    KC_WITH_CERT = 0x80
+    KC_WITH_TIMESTAMP = 0x100
+    KC_OUT_PEM = 0x200
+    KC_OUT_DER = 0x400
+    KC_OUT_BASE64 = 0x800
+    KC_PROXY_OFF = 0x00001000
+    KC_PROXY_ON = 0x00002000
+    KC_PROXY_AUTH = 0x00004000

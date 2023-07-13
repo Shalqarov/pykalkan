@@ -18,6 +18,9 @@ class Client(KalkanInterface):
     def x509_export_certificate_from_store(self):
         return self._kc.x509_export_certificate_from_store()
 
+    def sign_data(self, data):
+        return self._kc.sign_data(data)
+
     def verify_data(self, signature):
         return self._kc.verify_data(signature)
 

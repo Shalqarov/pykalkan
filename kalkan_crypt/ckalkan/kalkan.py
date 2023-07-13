@@ -20,6 +20,10 @@ class KCCLient:
     def x509_export_certificate_from_store(self):
         return self.handler.x509_export_certificate_from_store()
 
+    def sign_data(self, data: str):
+        # data_b64 = base64.b64encode(data.encode())
+        return self.handler.sign_data(data.encode())
+
     def verify_data(self, signature):
         return self.handler.verify_data(signature)
 

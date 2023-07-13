@@ -1,5 +1,8 @@
 import ctypes as ct
-from typing import Final
+import typing as t
+from typing import Any, Final
+
+from .enums import SignatureFlag
 
 OUT_CERT_LENGTH: Final[int] = 64768
 OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
@@ -53,6 +56,7 @@ class LibHandle:
 
     def x509_export_certificate_from_store(self):
         """ Экспорт сертификата из хранилища. """
+
         flags = ct.c_int(1)
         cert_len = ct.pointer(ct.c_int(32768))
         public_cert = ct.create_string_buffer(32768)
@@ -62,55 +66,76 @@ class LibHandle:
             public_cert,
             cert_len,
         )
-        if status_code != 0:
-            raise Exception(status_code)
         public_cert = public_cert.value.decode().replace(
             "-----BEGIN CERTIFICATE-----", ""
         )
         public_cert = public_cert.replace("-----END CERTIFICATE-----", "")
         public_cert = public_cert.replace("\n", "")
-        return public_cert
+        return status_code, public_cert
 
-    def verify_data(self, in_sign: str, in_data: str = "", alias: str = "", flag: int = 16):
-        kc_alias = ct.c_char_p(alias.encode())
+    def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag] = (
+            SignatureFlag.KC_SIGN_DRAFT, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64)):
+        """
+        Создание подписи на основе переданных данных.
 
-        kc_in_data = ct.c_char_p(in_data.encode())
-        kc_in_data_len = ct.c_int(len(in_data))
+        :param data: Данные
+        :param flags: Список флагов
+        :return: Подпись
+        """
+        flags = ct.c_int(sum([flag for flag in flags]))
+        data_to_sign = ct.create_string_buffer(data)
+        signed_data = ct.create_string_buffer(len(data_to_sign) * 2 + 50000)
+        status_code = self.handle.SignData(
+            self._alias,
+            flags,
+            data_to_sign,
+            ct.c_int(len(data_to_sign)),
+            ct.create_string_buffer(''.encode()),
+            len(data_to_sign) * 2 + 50000,
+            signed_data,
+            ct.pointer(ct.c_int(len(data_to_sign) * 2 + 50000))
+        )
+        return status_code, signed_data.value
 
-        kc_in_sign = ct.pointer(ct.c_char_p(in_sign.encode()))
-        kc_in_sign_len = ct.c_int(len(in_sign))
-
-        kc_out_data = ct.create_string_buffer(OUT_DATA_LENGTH)
-        kc_out_data_len = ct.c_int(OUT_DATA_LENGTH)
-
-        kc_out_verify_info = ct.create_string_buffer(OUT_VERIFY_INFO_LENGTH)
-        kc_out_verify_info_len = ct.c_int(OUT_VERIFY_INFO_LENGTH)
-
-        kc_out_cert = ct.create_string_buffer(OUT_CERT_LENGTH)
-        kc_out_cert_len = ct.c_int(OUT_CERT_LENGTH)
-
-        kc_in_cert_id = ct.c_int(0)
+    def verify_data(self, in_sign: str, in_data: str = "",
+                    flags: t.Iterable[SignatureFlag] = (
+                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64)) -> \
+            tuple[int, dict[str, Any]]:
+        """ Обеспечивает проверку подписи. """
+        alias = self._alias
+        flags = ct.c_int(sum([flag for flag in flags]))
+        data = ct.c_char_p(in_data.encode())
+        data_length = ct.c_int(len(in_data))
+        inout_sign_length = ct.c_int(len(in_sign))
+        inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign.encode())
+        out_data = ct.create_string_buffer(OUT_DATA_LENGTH)
+        out_data_length = ct.byref(ct.c_int(OUT_DATA_LENGTH))
+        out_verify_info = ct.create_string_buffer(OUT_VERIFY_INFO_LENGTH)
+        out_verify_info_length = ct.byref(ct.c_int(OUT_VERIFY_INFO_LENGTH))
+        cert_id = ct.c_int(0)
+        out_cert = ct.create_string_buffer(OUT_CERT_LENGTH)
+        out_cert_length = ct.byref(ct.c_int(OUT_CERT_LENGTH))
 
         status_code = self.handle.VerifyData(
-            kc_alias,
-            ct.c_int(flag),
-            kc_in_data,
-            kc_in_data_len,
-            kc_in_sign,
-            kc_in_sign_len,
-            kc_out_data,
-            kc_out_data_len,
-            kc_out_verify_info,
-            kc_out_verify_info_len,
-            kc_in_cert_id,
-            kc_out_cert,
-            kc_out_cert_len,
+            alias,
+            flags,
+            data,
+            data_length,
+            inout_sign,
+            inout_sign_length,
+            out_data,
+            out_data_length,
+            out_verify_info,
+            out_verify_info_length,
+            cert_id,
+            out_cert,
+            out_cert_length,
         )
 
         result = {
-            'Cert': kc_out_cert.value,
-            'Info': kc_out_verify_info.value,
-            'Data': kc_out_data.value
+            'Cert': out_cert.value,
+            'Info': out_verify_info.value,
+            'Data': out_data.value
         }
         return status_code, result
 

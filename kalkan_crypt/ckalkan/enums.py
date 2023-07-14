@@ -1,6 +1,12 @@
 from enum import IntEnum
 
 
+class CertCode(IntEnum):
+    KC_CERT_DER = 0x00000101  # Кодировка DER
+    KC_CERT_PEM = 0x00000102  # Кодировка PEM
+    KC_CERT_B64 = 0x00000104  # Кодировка Base64
+
+
 class CertProp(IntEnum):
     KC_ISSUER_COUNTRYNAME = 0x00000801  # Страна издателя
     KC_ISSUER_SOPN = 0x00000802  # Название штата или провинции издателя

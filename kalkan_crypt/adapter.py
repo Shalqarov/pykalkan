@@ -20,6 +20,12 @@ class Client(KalkanInterface):
     def x509_export_certificate_from_store(self):
         return self._kc.x509_export_certificate_from_store()
 
+    def x509_load_certificate_from_buffer(self, in_cert: str) -> int:
+        return self._kc.x509_load_certificate_from_buffer(in_cert)
+
+    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, Any]:
+        return self._kc.x509_certificate_get_info(in_cert)
+
     def sign_data(self, data):
         return self._kc.sign_data(data)
 

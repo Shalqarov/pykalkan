@@ -22,6 +22,12 @@ class KCCLient:
     def x509_export_certificate_from_store(self):
         return self.handler.x509_export_certificate_from_store()
 
+    def x509_load_certificate_from_buffer(self, in_cert: str) -> int:
+        return self.handler.x509_load_certificate_from_buffer(in_cert.encode())
+
+    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, Any]:
+        return self.handler.x509_certificate_get_info(in_cert.encode())
+
     def sign_data(self, data: str):
         return self.handler.sign_data(data.encode())
 

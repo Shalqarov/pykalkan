@@ -2,7 +2,7 @@ import ctypes as ct
 import typing as t
 from typing import Any, Final
 
-from .enums import SignatureFlag
+from .enums import CertCode, CertProp, SignatureFlag
 
 OUT_CERT_LENGTH: Final[int] = 64768
 OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
@@ -73,6 +73,35 @@ class LibHandle:
         public_cert = public_cert.replace("\n", "")
         return status_code, public_cert
 
+    def x509_load_certificate_from_buffer(self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64) -> int:
+        kc_in_cert = ct.c_char_p(in_cert)
+        kc_in_cert_len = ct.c_int(len(in_cert))
+        kc_cert_code = ct.c_int(cert_code)
+        return self.handle.X509LoadCertificateFromBuffer(kc_in_cert, kc_in_cert_len, kc_cert_code)
+
+    def x509_certificate_get_info(
+            self,
+            in_cert: bytes,
+            props: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME) -> tuple[int, Any]:
+        """
+        Обеспечивает получение значений полей/расширений из сертификата.
+        Сертификат должен быть предварительно загружен с помощью одной из функций:
+        LoadKeyStore(), X509LoadCertificateFromFile(), X509LoadCertificateFromBuffer().
+        """
+        kc_in_cert = ct.c_char_p(in_cert)
+        kc_in_cert_len = ct.c_int(len(in_cert))
+        out_data_len = 32768
+        out_data = ct.create_string_buffer(out_data_len)
+        props = ct.c_int(props)
+        status = self.handle.X509CertificateGetInfo(
+            kc_in_cert,
+            kc_in_cert_len,
+            props,
+            out_data,
+            ct.pointer(ct.c_int(out_data_len))
+        )
+        return status, out_data.value
+
     def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag] = (
             SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64,
             SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT)):
@@ -104,7 +133,7 @@ class LibHandle:
     def verify_data(self, in_sign: bytes, in_data: bytes = b"",
                     flags: t.Iterable[SignatureFlag] = (
                             SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_IN2_BASE64,
-                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT
+                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT, SignatureFlag.KC_OUT_BASE64
                     )) -> \
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """

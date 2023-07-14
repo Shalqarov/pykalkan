@@ -22,7 +22,12 @@ class KalkanInterface(ABC):
         ...
 
     @abstractmethod
-    def x509_certigicate_get_info(self, in_cert:str, cert_prop):
+    def x509_load_certificate_from_buffer(self, in_cert: str) -> int:
+        ...
+
+    @abstractmethod
+    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, Any]:
+        ...
 
     @abstractmethod
     def sign_data(self, data: str):

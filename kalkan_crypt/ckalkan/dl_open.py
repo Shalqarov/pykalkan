@@ -74,7 +74,8 @@ class LibHandle:
         return status_code, public_cert
 
     def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag] = (
-            SignatureFlag.KC_SIGN_DRAFT, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64)):
+            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64,
+            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT)):
         """
         Создание подписи на основе переданных данных.
 
@@ -100,20 +101,22 @@ class LibHandle:
         )
         return status_code, signed_data.value
 
-    def verify_data(self, in_sign: str, in_data: str = "SGVsbG8sIFdvcmxkIQ==",
+    def verify_data(self, in_sign: bytes, in_data: bytes = b"",
                     flags: t.Iterable[SignatureFlag] = (
-                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64,)) -> \
+                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_IN2_BASE64,
+                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT
+                    )) -> \
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """
         alias = self._alias
 
         flags = ct.c_int(sum([flag for flag in flags]))
 
-        data = ct.c_char_p(in_data.encode())
+        data = ct.c_char_p(in_data)
         data_length = ct.c_int(len(in_data))
 
         inout_sign_length = ct.c_int(len(in_sign))
-        inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign.encode())
+        inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign)
 
         out_data = ct.create_string_buffer(OUT_DATA_LENGTH)
         out_data_length = ct.byref(ct.c_int(OUT_DATA_LENGTH))
@@ -121,7 +124,7 @@ class LibHandle:
         out_verify_info = ct.create_string_buffer(OUT_VERIFY_INFO_LENGTH)
         out_verify_info_length = ct.byref(ct.c_int(OUT_VERIFY_INFO_LENGTH))
 
-        cert_id = ct.c_int(0)
+        cert_id = ct.c_int(1)
         out_cert = ct.create_string_buffer(OUT_CERT_LENGTH)
         out_cert_length = ct.byref(ct.c_int(OUT_CERT_LENGTH))
 

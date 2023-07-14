@@ -1,3 +1,5 @@
+from typing import Any
+
 from .ckalkan.kalkan import KCCLient as _KCClient, new_kc_client
 from .kalkan_interface import KalkanInterface
 
@@ -21,8 +23,8 @@ class Client(KalkanInterface):
     def sign_data(self, data):
         return self._kc.sign_data(data)
 
-    def verify_data(self, signature):
-        return self._kc.verify_data(signature)
+    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
+        return self._kc.verify_data(signature, data)
 
 
 def new_client(lib: str) -> Client:

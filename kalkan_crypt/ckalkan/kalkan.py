@@ -1,3 +1,5 @@
+from typing import Any
+
 from .dl_open import LibHandle, get_handle
 
 
@@ -21,11 +23,10 @@ class KCCLient:
         return self.handler.x509_export_certificate_from_store()
 
     def sign_data(self, data: str):
-        # data_b64 = base64.b64encode(data.encode())
         return self.handler.sign_data(data.encode())
 
-    def verify_data(self, signature):
-        return self.handler.verify_data(signature)
+    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
+        return self.handler.verify_data(signature.encode(), in_data=data.encode())
 
 
 def new_kc_client(lib: str) -> KCCLient:

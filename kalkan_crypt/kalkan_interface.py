@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class KalkanInterface(ABC):
@@ -20,10 +21,13 @@ class KalkanInterface(ABC):
     def x509_export_certificate_from_store(self):
         ...
 
+    # @abstractmethod
+    # def x509_certigicate_get_info(self, in_cert:str, ):
+
     @abstractmethod
     def sign_data(self, data: str):
         ...
 
     @abstractmethod
-    def verify_data(self, signature):
+    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
         ...

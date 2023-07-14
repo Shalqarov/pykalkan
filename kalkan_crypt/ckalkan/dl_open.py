@@ -69,6 +69,8 @@ class LibHandle:
         return status_code, public_cert.value
 
     def x509_load_certificate_from_buffer(self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64) -> int:
+        """ Загрузка сертификата из памяти. """
+
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
         kc_cert_code = ct.c_int(cert_code)
@@ -105,7 +107,6 @@ class LibHandle:
             SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT)):
         """
         Создание подписи на основе переданных данных.
-
         :param data: Данные
         :param flags: Список флагов
         :return: Подпись

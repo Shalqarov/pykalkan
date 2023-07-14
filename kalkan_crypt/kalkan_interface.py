@@ -21,8 +21,8 @@ class KalkanInterface(ABC):
     def x509_export_certificate_from_store(self):
         ...
 
-    # @abstractmethod
-    # def x509_certigicate_get_info(self, in_cert:str, ):
+    @abstractmethod
+    def x509_certigicate_get_info(self, in_cert:str, cert_prop):
 
     @abstractmethod
     def sign_data(self, data: str):

@@ -1,14 +1,50 @@
 from enum import IntEnum
 
 
+class CertProp(IntEnum):
+    KC_ISSUER_COUNTRYNAME = 0x00000801  # Страна издателя
+    KC_ISSUER_SOPN = 0x00000802  # Название штата или провинции издателя
+    KC_ISSUER_LOCALITYNAME = 0x00000803  # Населённый пункт издателя
+    KC_ISSUER_ORG_NAME = 0x00000804  # Наименование организации издателя
+    KC_ISSUER_ORGUNIT_NAME = 0x00000805  # Название организационного подразделения издателя
+    KC_ISSUER_COMMONNAME = 0x00000806  # Имя Фамилия издателя
+    KC_SUBJECT_COUNTRYNAME = 0x00000807  # Страна субъекта
+    KC_SUBJECT_SOPN = 0x00000808  # Название штата или провинции субъекта
+    KC_SUBJECT_LOCALITYNAME = 0x00000809  # Населенный пункт субъекта
+    KC_SUBJECT_COMMONNAME = 0x0000080a  # Общее имя субъекта
+    KC_SUBJECT_GIVENNAME = 0x0000080b  # Имя субъекта
+    KC_SUBJECT_SURNAME = 0x0000080c  # Фамилия субъекта
+    KC_SUBJECT_SERIALNUMBER = 0x0000080d  # Серийный номер субъекта
+    KC_SUBJECT_EMAIL = 0x0000080e  # e-mail субъекта
+    KC_SUBJECT_ORG_NAME = 0x0000080f  # Наименование организации субъекта
+    KC_SUBJECT_ORGUNIT_NAME = 0x00000810  # Название организационного подразделения субъекта
+    KC_SUBJECT_BC = 0x00000811  # Бизнес категория субъекта
+    KC_SUBJECT_DC = 0x00000812  # Доменный компонент субъекта
+    KC_NOTBEFORE = 0x00000813  # Дата действителен с
+    KC_NOTAFTER = 0x00000814  # Дата действителен по
+    KC_KEY_USAGE = 0x00000815  # Использование ключа
+    KC_EXT_KEY_USAGE = 0x00000816  # Расширенное использование ключа
+    KC_AUTH_KEY_ID = 0x00000817  # Идентификатор ключа центра сертификации
+    KC_SUBJ_KEY_ID = 0x00000818  # Идентификатор ключа субъекта
+    KC_CERT_SN = 0x00000819  # Серийный номер сертификата
+    KC_ISSUER_DN = 0x0000081a  # Отличительное имя издателя
+    KC_SUBJECT_DN = 0x0000081b  # Отличительное имя субъекта
+    KC_SIGNATURE_ALG = 0x0000081c  # Алгоритм подписи
+    KC_PUBKEY = 0x0000081d  # Получение открытого ключа
+    KC_POLICIES_ID = 0x0000081e  # Получение идентификатора политики сертификата
+    KC_OCSP = 0x0000081f  # Получение URL-адреса OCSP
+    KC_GET_CRL = 0x00000820  # Получение URL-адреса CRL
+    KC_GET_DELTA_CRL = 0x00000821  # Получение URL-адреса delta CRL
+
+
 class StorageType(IntEnum):
-    KCST_PKCS12 = 0x1
-    KCST_KZIDCARD = 0x2
-    KCST_KAZTOKEN = 0x4
-    KCST_ETOKEN72K = 0x8
-    KCST_JACARTA = 0x10
-    KCST_X509CERT = 0x20
-    KCST_AKEY = 0x40
+    KCST_PKCS12 = 0x00000001  # Файловая система (небезопасный способ хранения ключей)
+    KCST_KZIDCARD = 0x00000002  # Удостоверение личности гражданина РК
+    KCST_KAZTOKEN = 0x00000004  # Казтокен
+    KCST_ETOKEN72K = 0x00000008  # eToken 72k
+    KCST_JACARTA = 0x00000010  # JaCarta
+    KCST_X509CERT = 0x00000020  # Сертификат X509
+    KCST_AKEY = 0x00000040  # aKey
 
 
 class SignatureFlag(IntEnum):

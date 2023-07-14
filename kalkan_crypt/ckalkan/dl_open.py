@@ -66,12 +66,7 @@ class LibHandle:
             public_cert,
             cert_len,
         )
-        public_cert = public_cert.value.decode().replace(
-            "-----BEGIN CERTIFICATE-----", ""
-        )
-        public_cert = public_cert.replace("-----END CERTIFICATE-----", "")
-        public_cert = public_cert.replace("\n", "")
-        return status_code, public_cert
+        return status_code, public_cert.value
 
     def x509_load_certificate_from_buffer(self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64) -> int:
         kc_in_cert = ct.c_char_p(in_cert)
@@ -90,9 +85,12 @@ class LibHandle:
         """
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
+
         out_data_len = 32768
         out_data = ct.create_string_buffer(out_data_len)
+
         props = ct.c_int(props)
+
         status = self.handle.X509CertificateGetInfo(
             kc_in_cert,
             kc_in_cert_len,

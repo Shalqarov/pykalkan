@@ -32,6 +32,9 @@ class Client(KalkanInterface):
     def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
         return self._kc.verify_data(signature, data)
 
+    def x509_validate_certificate(self, in_cert: str):
+        return self._kc.x509_validate_certificate(in_cert)
+
 
 def new_client(lib: str) -> Client:
     try:

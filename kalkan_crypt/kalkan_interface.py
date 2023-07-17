@@ -36,3 +36,7 @@ class KalkanInterface(ABC):
     @abstractmethod
     def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
         ...
+
+    @abstractmethod
+    def x509_validate_certificate(self, in_cert: str):
+        ...

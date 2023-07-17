@@ -34,6 +34,9 @@ class KCCLient:
     def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
         return self.handler.verify_data(signature.encode(), in_data=data.encode())
 
+    def x509_validate_certificate(self, in_cert: str):
+        return self.handler.x509_validate_certificate(in_cert.encode())
+
 
 def new_kc_client(lib: str) -> KCCLient:
     try:

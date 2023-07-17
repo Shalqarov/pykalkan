@@ -1,6 +1,12 @@
 from enum import IntEnum
 
 
+class ValidateType(IntEnum):
+    KC_USE_NOTHING = 0x401  # Не делать проверок
+    KC_USE_CRL = 0x402  # Проверка сертификата по списку отозванных сертификатов
+    KC_USE_OCSP = 0x404  # Проверка сертификата посредством сервиса OCSP
+
+
 class CertCode(IntEnum):
     KC_CERT_DER = 0x101  # Кодировка DER
     KC_CERT_PEM = 0x102  # Кодировка PEM

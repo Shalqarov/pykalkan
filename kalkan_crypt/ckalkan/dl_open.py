@@ -2,7 +2,7 @@ import ctypes as ct
 import typing as t
 from typing import Any, Final
 
-from .enums import CertCode, CertProp, SignatureFlag
+from .enums import CertCode, CertProp, SignatureFlag, ValidateType
 
 OUT_CERT_LENGTH: Final[int] = 64768
 OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
@@ -104,7 +104,7 @@ class LibHandle:
 
     def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag] = (
             SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64,
-            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT)):
+            SignatureFlag.KC_WITH_CERT)):
         """
         Создание подписи на основе переданных данных.
         :param data: Данные
@@ -132,7 +132,7 @@ class LibHandle:
     def verify_data(self, in_sign: bytes, in_data: bytes = b"",
                     flags: t.Iterable[SignatureFlag] = (
                             SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_IN2_BASE64,
-                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT, SignatureFlag.KC_OUT_BASE64
+                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT,
                     )) -> \
             tuple[int, dict[str, Any]]:
         """ Обеспечивает проверку подписи. """
@@ -175,9 +175,48 @@ class LibHandle:
         result = {
             'Cert': out_cert.value,
             'Info': out_verify_info.value,
-            'Data': out_data.value
+            'Data': out_data.value,
         }
         return status_code, result
+
+    # http://test.pki.gov.kz/ocsp/
+    # http://ocsp.pki.gov.kz
+    def x509_validate_certificate(self, in_cert: bytes,
+                                  valid_type: ValidateType = ValidateType.KC_USE_OCSP,
+                                  valid_path: bytes = b"http://ocsp.pki.gov.kz"):
+        kc_in_cert = ct.c_char_p(in_cert)
+        kc_in_cert_len = ct.c_int(len(in_cert))
+
+        kc_valid_path = ct.c_char_p(valid_path)
+        kc_valid_path_len = ct.c_int(len(valid_path))
+
+        kc_valid_type = ct.c_int(valid_type)
+
+        data_len = 8192
+        out_info = ct.create_string_buffer(data_len)
+        out_info_len = ct.c_int(data_len)
+
+        resp = ct.create_string_buffer(data_len)
+        resp_len = ct.c_int(data_len)
+
+        status = self.handle.X509ValidateCertificate(
+            kc_in_cert,
+            kc_in_cert_len,
+            kc_valid_type,
+            kc_valid_path,
+            ct.c_int(0),
+            out_info,
+            ct.pointer(out_info_len),
+            ct.c_int(0),
+            resp,
+            ct.pointer(resp_len),
+        )
+
+        res = {
+            "response": resp.value,
+            "info": out_info.value,
+        }
+        return int(status), res
 
 
 def get_handle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:

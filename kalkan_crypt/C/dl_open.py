@@ -281,7 +281,7 @@ class LibHandle:
         return int(status), res
 
 
-def get_handle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:
+def get_libhandle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:
     """
     Подключение библиотеки.
     :param lib_path: путь к библиотеке (/usr/lib/...)

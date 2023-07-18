@@ -1,6 +1,6 @@
 from typing import Any
 
-from .ckalkan.kalkan import KCCLient as _KCClient, new_kc_client
+from .C.kalkan import KCCLient as _KCClient, new_kc_client
 from .kalkan_interface import KalkanInterface
 
 

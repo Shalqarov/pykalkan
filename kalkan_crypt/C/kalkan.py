@@ -1,12 +1,12 @@
 from typing import Any
 
-from .dl_open import LibHandle, get_handle
+from .dl_open import LibHandle as _LibHandle, get_libhandle as _get_libhandle
 
 
 class KCCLient:
     """ Логика вызова методов из библиотеки """
 
-    def __init__(self, handle: LibHandle):
+    def __init__(self, handle: _LibHandle):
         self.handler = handle
 
     def kc_init(self) -> int:
@@ -40,7 +40,7 @@ class KCCLient:
 
 def new_kc_client(lib: str) -> KCCLient:
     try:
-        handler = get_handle(lib)
+        handler = _get_libhandle(lib)
         return KCCLient(handler)
     except OSError as e:
         raise OSError(f"Error in new_kc_client():\n {e}")

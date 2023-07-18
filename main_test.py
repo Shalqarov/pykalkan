@@ -5,7 +5,7 @@ import pytest
 from dotenv import load_dotenv
 
 from kalkan_crypt.C.error_codes import wrap_error
-from kalkan_crypt.adapter import Client
+from kalkan_crypt.adapter import Adapter
 
 load_dotenv()
 
@@ -18,7 +18,7 @@ cert_password = "Qwerty12"  # Test
 @pytest.mark.parametrize("sign,data", [(os.getenv("TEST_SIGN_BIN"), os.getenv("TEST_DATA_BIN")),
                                        (os.getenv("TEST_SIGN_IIN"), os.getenv("TEST_DATA_IIN"))])
 def test(sign, data):
-    cli = Client(library)
+    cli = Adapter(library)
     status = cli.init()
     if status != 0:
         assert False, f"Lib Init failed: {wrap_error(status)}"
@@ -43,7 +43,7 @@ def test(sign, data):
 
 
 def main():
-    cli = Client(library)
+    cli = Adapter(library)
     status = cli.init()
     if status != 0:
         print(f"Lib Init failed: {wrap_error(status)}")

@@ -1,10 +1,10 @@
 from typing import Any
 
 from .C.kalkan import KCCLient as _KCCLient
-from .kalkan_interface import KalkanInterface
+from .interface import KalkanInterface
 
 
-class Client(KalkanInterface):
+class Adapter(KalkanInterface):
     def __init__(self, lib: str):
         self._kc = _KCCLient(lib)
 

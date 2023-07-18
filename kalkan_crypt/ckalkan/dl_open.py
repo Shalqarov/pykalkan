@@ -1,12 +1,14 @@
 import ctypes as ct
 import typing as t
-from typing import Any, Final
+from typing import Final
 
 from .enums import CertCode, CertProp, SignatureFlag, ValidateType
 
-OUT_CERT_LENGTH: Final[int] = 64768
-OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
-OUT_DATA_LENGTH: Final[int] = 28000
+VERIFY_OUT_DATA_LENGTH: Final[int] = 28000
+VERIFY_OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
+VERIFY_OUT_CERT_LENGTH: Final[int] = 64768
+
+VALIDATE_DATA_LENGTH: Final[int] = 8192
 
 
 class LibHandle:
@@ -54,8 +56,11 @@ class LibHandle:
         """Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки."""
         self.handle.KC_Finalize()
 
-    def x509_export_certificate_from_store(self):
-        """Экспорт сертификата из хранилища."""
+    def x509_export_certificate_from_store(self) -> tuple[int, bytes]:
+        """
+        Экспорт сертификата из хранилища.
+        :return: tuple(статус ошибки, сертификат)
+        """
 
         flags = ct.c_int(1)
         cert_len = ct.pointer(ct.c_int(32768))
@@ -71,7 +76,13 @@ class LibHandle:
     def x509_load_certificate_from_buffer(
             self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64
     ) -> int:
-        """Загрузка сертификата из памяти."""
+        """
+        Загрузка сертификата из памяти.
+
+        :param in_cert:  сертификат в виде строки в байтах;
+        :param cert_code:  кодировка сертификата (см. enums.py CertCode).
+        :return: 0 При успешном завершении, в противном случае код ошибки
+        """
 
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
@@ -81,12 +92,18 @@ class LibHandle:
         )
 
     def x509_certificate_get_info(
-            self, in_cert: bytes, props: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
-    ) -> tuple[int, Any]:
+            self, in_cert: bytes, prop: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
+    ) -> tuple[int, bytes]:
         """
         Обеспечивает получение значений полей/расширений из сертификата.
         Сертификат должен быть предварительно загружен с помощью одной из функций:
-        LoadKeyStore(), X509LoadCertificateFromFile(), X509LoadCertificateFromBuffer().
+         - LoadKeyStore(),
+         - X509LoadCertificateFromFile(),
+         - X509LoadCertificateFromBuffer().
+        :param in_cert:  сертификат в виде строки в байтах;
+        :param prop: идентификатор полей/расширений сертификата (см. enums.py CertProp)
+
+        :return: tuple(статус_операции, информация по заданному флагу)
         """
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
@@ -94,12 +111,12 @@ class LibHandle:
         out_data_len = 32768
         out_data = ct.create_string_buffer(out_data_len)
 
-        props = ct.c_int(props)
+        kc_prop = ct.c_int(prop)
 
         status = self.handle.X509CertificateGetInfo(
             kc_in_cert,
             kc_in_cert_len,
-            props,
+            kc_prop,
             out_data,
             ct.pointer(ct.c_int(out_data_len)),
         )
@@ -115,12 +132,13 @@ class LibHandle:
                     SignatureFlag.KC_WITH_CERT,
                     SignatureFlag.KC_PROXY_ON,
             ),
-    ):
+    ) -> tuple[int, bytes]:
         """
-        Создание подписи на основе переданных данных.
-        :param data: Данные
-        :param flags: Список флагов
-        :return: Подпись
+        Подписывает данные.
+
+        :param data: входные данные;
+        :param flags: список флагов
+        :return: tuple(статус_операции, подпись в виде base64)
         """
         flags = ct.c_int(sum([flag for flag in flags]))
 
@@ -171,15 +189,15 @@ class LibHandle:
         inout_sign_length = ct.c_int(len(in_sign))
         inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign)
 
-        out_data = ct.create_string_buffer(OUT_DATA_LENGTH)
-        out_data_length = ct.byref(ct.c_int(OUT_DATA_LENGTH))
+        out_data = ct.create_string_buffer(VERIFY_OUT_DATA_LENGTH)
+        out_data_length = ct.byref(ct.c_int(VERIFY_OUT_DATA_LENGTH))
 
-        out_verify_info = ct.create_string_buffer(OUT_VERIFY_INFO_LENGTH)
-        out_verify_info_length = ct.byref(ct.c_int(OUT_VERIFY_INFO_LENGTH))
+        out_verify_info = ct.create_string_buffer(VERIFY_OUT_VERIFY_INFO_LENGTH)
+        out_verify_info_length = ct.byref(ct.c_int(VERIFY_OUT_VERIFY_INFO_LENGTH))
 
         cert_id = ct.c_int(1)
-        out_cert = ct.create_string_buffer(OUT_CERT_LENGTH)
-        out_cert_length = ct.byref(ct.c_int(OUT_CERT_LENGTH))
+        out_cert = ct.create_string_buffer(VERIFY_OUT_CERT_LENGTH)
+        out_cert_length = ct.byref(ct.c_int(VERIFY_OUT_CERT_LENGTH))
 
         status_code = self.handle.VerifyData(
             alias,
@@ -221,12 +239,13 @@ class LibHandle:
         http://ocsp.pki.gov.kz - Боевой ocsp сервис
 
         :param in_cert: сертификат в виде строки в байтах
-        :param valid_type: тип проверки (OCSP/CRL). По умолчанию OCSP,
-            все типы валидации можно найти в файле enums.py(class ValidateType)
+        :param valid_type: тип проверки (OCSP/CRL). По умолчанию OCSP (см. enums.py ValidateType)
         :param valid_path: Путь к валидации:
             - при OCSP указать сайт;
             - при CRL - путь к файлу
             (по умолчанию OCSP url)
+
+        :return: tuple(статус_ошибки, результат_запроса)
         """
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))

@@ -1,18 +1,17 @@
 import ctypes as ct
 import typing as t
-from typing import Final
 
 from .enums import CertCode, CertProp, SignatureFlag, ValidateType
 
-VERIFY_OUT_DATA_LENGTH: Final[int] = 28000
-VERIFY_OUT_VERIFY_INFO_LENGTH: Final[int] = 64768
-VERIFY_OUT_CERT_LENGTH: Final[int] = 64768
+VERIFY_OUT_DATA_LENGTH: t.Final[int] = 28000
+VERIFY_OUT_VERIFY_INFO_LENGTH: t.Final[int] = 64768
+VERIFY_OUT_CERT_LENGTH: t.Final[int] = 64768
 
-VALIDATE_DATA_LENGTH: Final[int] = 8192
+VALIDATE_DATA_LENGTH: t.Final[int] = 8192
 
 
 class LibHandle:
-    """Хендлер для работы с библиотекой ключей"""
+    """ Хендлер для работы с dynamic lib """
 
     def __init__(self, handle, lib_name):
         self.handle = handle

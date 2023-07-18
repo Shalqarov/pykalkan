@@ -1,17 +1,16 @@
 from typing import Any
 
-from .dl_open import LibHandle as _LibHandle, get_libhandle as _get_libhandle
+from .dl_open import get_libhandle as _get_libhandle
 
 
 class KCCLient:
     """ Логика вызова методов из библиотеки """
 
-    def __init__(self, handle: _LibHandle):
-        self.handler = handle
+    def __init__(self, lib: str):
+        self.handler = _get_libhandle(lib)
 
     def kc_init(self) -> int:
-        status = self.handler.kc_init()
-        return status
+        return self.handler.kc_init()
 
     def load_key_store(self, path: str, password: str) -> int:
         return self.handler.kc_load_key_store(path, password)
@@ -36,11 +35,3 @@ class KCCLient:
 
     def x509_validate_certificate(self, in_cert: str):
         return self.handler.x509_validate_certificate(in_cert.encode())
-
-
-def new_kc_client(lib: str) -> KCCLient:
-    try:
-        handler = _get_libhandle(lib)
-        return KCCLient(handler)
-    except OSError as e:
-        raise OSError(f"Error in new_kc_client():\n {e}")

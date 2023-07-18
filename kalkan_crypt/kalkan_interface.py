@@ -3,8 +3,6 @@ from typing import Any
 
 
 class KalkanInterface(ABC):
-    """ Методы которые нужно реализовать в клиенте """
-
     @abstractmethod
     def init(self) -> int:
         ...

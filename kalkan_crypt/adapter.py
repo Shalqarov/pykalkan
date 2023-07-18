@@ -1,12 +1,12 @@
 from typing import Any
 
-from .C.kalkan import KCCLient as _KCClient, new_kc_client
+from .C.kalkan import KCCLient as _KCCLient
 from .kalkan_interface import KalkanInterface
 
 
 class Client(KalkanInterface):
-    def __init__(self, kc: _KCClient):
-        self._kc = kc
+    def __init__(self, lib: str):
+        self._kc = _KCCLient(lib)
 
     def init(self) -> int:
         return self._kc.kc_init()
@@ -34,11 +34,3 @@ class Client(KalkanInterface):
 
     def x509_validate_certificate(self, in_cert: str):
         return self._kc.x509_validate_certificate(in_cert)
-
-
-def new_client(lib: str) -> Client:
-    try:
-        kc = new_kc_client(lib)
-        return Client(kc)
-    except OSError as e:
-        raise OSError(f"Error in new_client() /kalkan_crypt/adapter.py:21: \n{e}")

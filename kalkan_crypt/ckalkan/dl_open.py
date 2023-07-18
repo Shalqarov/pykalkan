@@ -10,7 +10,7 @@ OUT_DATA_LENGTH: Final[int] = 28000
 
 
 class LibHandle:
-    """ Хендлер для работы с библиотекой ключей """
+    """Хендлер для работы с библиотекой ключей"""
 
     def __init__(self, handle, lib_name):
         self.handle = handle
@@ -51,11 +51,11 @@ class LibHandle:
         )
 
     def kc_finalize(self):
-        """ Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки. """
+        """Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки."""
         self.handle.KC_Finalize()
 
     def x509_export_certificate_from_store(self):
-        """ Экспорт сертификата из хранилища. """
+        """Экспорт сертификата из хранилища."""
 
         flags = ct.c_int(1)
         cert_len = ct.pointer(ct.c_int(32768))
@@ -68,18 +68,21 @@ class LibHandle:
         )
         return status_code, public_cert.value
 
-    def x509_load_certificate_from_buffer(self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64) -> int:
-        """ Загрузка сертификата из памяти. """
+    def x509_load_certificate_from_buffer(
+            self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64
+    ) -> int:
+        """Загрузка сертификата из памяти."""
 
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
         kc_cert_code = ct.c_int(cert_code)
-        return self.handle.X509LoadCertificateFromBuffer(kc_in_cert, kc_in_cert_len, kc_cert_code)
+        return self.handle.X509LoadCertificateFromBuffer(
+            kc_in_cert, kc_in_cert_len, kc_cert_code
+        )
 
     def x509_certificate_get_info(
-            self,
-            in_cert: bytes,
-            props: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME) -> tuple[int, Any]:
+            self, in_cert: bytes, props: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
+    ) -> tuple[int, Any]:
         """
         Обеспечивает получение значений полей/расширений из сертификата.
         Сертификат должен быть предварительно загружен с помощью одной из функций:
@@ -98,13 +101,21 @@ class LibHandle:
             kc_in_cert_len,
             props,
             out_data,
-            ct.pointer(ct.c_int(out_data_len))
+            ct.pointer(ct.c_int(out_data_len)),
         )
         return status, out_data.value
 
-    def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag] = (
-            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_OUT_BASE64,
-            SignatureFlag.KC_WITH_CERT)):
+    def sign_data(
+            self,
+            data: bytes,
+            flags: t.Iterable[SignatureFlag] = (
+                    SignatureFlag.KC_SIGN_CMS,
+                    SignatureFlag.KC_IN_BASE64,
+                    SignatureFlag.KC_OUT_BASE64,
+                    SignatureFlag.KC_WITH_CERT,
+                    SignatureFlag.KC_PROXY_ON,
+            ),
+    ):
         """
         Создание подписи на основе переданных данных.
         :param data: Данные
@@ -122,20 +133,34 @@ class LibHandle:
             flags,
             data_to_sign,
             ct.c_int(len(data_to_sign)),
-            ct.create_string_buffer(''.encode()),
+            ct.create_string_buffer("".encode()),
             len(data_to_sign) * 2 + 50000,
             signed_data,
-            ct.pointer(ct.c_int(len(data_to_sign) * 2 + 50000))
+            ct.pointer(ct.c_int(len(data_to_sign) * 2 + 50000)),
         )
         return status_code, signed_data.value
 
-    def verify_data(self, in_sign: bytes, in_data: bytes = b"",
-                    flags: t.Iterable[SignatureFlag] = (
-                            SignatureFlag.KC_SIGN_CMS, SignatureFlag.KC_IN_BASE64, SignatureFlag.KC_IN2_BASE64,
-                            SignatureFlag.KC_DETACHED_DATA, SignatureFlag.KC_WITH_CERT,
-                    )) -> \
-            tuple[int, dict[str, Any]]:
-        """ Обеспечивает проверку подписи. """
+    def verify_data(
+            self,
+            in_sign: bytes,
+            in_data: bytes = b"",
+            flags: t.Iterable[SignatureFlag] = (
+                    SignatureFlag.KC_SIGN_CMS,
+                    SignatureFlag.KC_IN_BASE64,
+                    SignatureFlag.KC_IN2_BASE64,
+                    SignatureFlag.KC_DETACHED_DATA,
+                    SignatureFlag.KC_WITH_CERT,
+                    SignatureFlag.KC_OUT_BASE64,
+            ),
+    ) -> tuple[int, dict[str, bytes]]:
+        """
+        Обеспечивает проверку подписи.
+        :param in_sign: подписанные входные данные;
+        :param in_data: входные данные для сверки;
+        :param flags: флаги для верификации;
+
+        :return: tuple(статус_ошибки, верифицированные данные)
+        """
         alias = self._alias
 
         flags = ct.c_int(sum([flag for flag in flags]))
@@ -173,22 +198,40 @@ class LibHandle:
         )
 
         result = {
-            'Cert': out_cert.value,
-            'Info': out_verify_info.value,
-            'Data': out_data.value,
+            "Cert": out_cert.value,
+            "Info": out_verify_info.value,
+            "Data": out_data.value,
         }
         return status_code, result
 
-    # http://test.pki.gov.kz/ocsp/
-    # http://ocsp.pki.gov.kz
-    def x509_validate_certificate(self, in_cert: bytes,
-                                  valid_type: ValidateType = ValidateType.KC_USE_OCSP,
-                                  valid_path: bytes = b"http://ocsp.pki.gov.kz"):
+    def x509_validate_certificate(
+            self,
+            in_cert: bytes,
+            valid_type: ValidateType = ValidateType.KC_USE_OCSP,
+            valid_path: bytes = b"http://ocsp.pki.gov.kz",
+    ) -> tuple[int, dict[str, bytes]]:
+        """
+        Осуществляет проверку сертификата:
+         - проверка срока действия;
+         - построение цепочки сертификатов;
+         - проверка отозванности по OCSP или CRL.
+
+        http://test.pki.gov.kz/ocsp/ - Тестовый ocsp сервис
+
+        http://ocsp.pki.gov.kz - Боевой ocsp сервис
+
+        :param in_cert: сертификат в виде строки в байтах
+        :param valid_type: тип проверки (OCSP/CRL). По умолчанию OCSP,
+            все типы валидации можно найти в файле enums.py(class ValidateType)
+        :param valid_path: Путь к валидации:
+            - при OCSP указать сайт;
+            - при CRL - путь к файлу
+            (по умолчанию OCSP url)
+        """
         kc_in_cert = ct.c_char_p(in_cert)
         kc_in_cert_len = ct.c_int(len(in_cert))
 
         kc_valid_path = ct.c_char_p(valid_path)
-        kc_valid_path_len = ct.c_int(len(valid_path))
 
         kc_valid_type = ct.c_int(valid_type)
 
@@ -207,7 +250,7 @@ class LibHandle:
             ct.c_int(0),
             out_info,
             ct.pointer(out_info_len),
-            ct.c_int(0),
+            ct.c_int(SignatureFlag.KC_NOCHECKCERTTIME),
             resp,
             ct.pointer(resp_len),
         )

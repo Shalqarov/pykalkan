@@ -1,5 +1,3 @@
-from typing import Any
-
 from .dl_open import get_libhandle as _get_libhandle
 
 
@@ -18,20 +16,20 @@ class KCCLient:
     def finalize(self):
         self.handler.kc_finalize()
 
-    def x509_export_certificate_from_store(self):
+    def x509_export_certificate_from_store(self) -> tuple[int, bytes]:
         return self.handler.x509_export_certificate_from_store()
 
     def x509_load_certificate_from_buffer(self, in_cert: str) -> int:
         return self.handler.x509_load_certificate_from_buffer(in_cert.encode())
 
-    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, Any]:
+    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, bytes]:
         return self.handler.x509_certificate_get_info(in_cert.encode())
 
-    def sign_data(self, data: str):
+    def sign_data(self, data: str) -> tuple[int,  bytes]:
         return self.handler.sign_data(data.encode())
 
-    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
+    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, bytes]]:
         return self.handler.verify_data(signature.encode(), in_data=data.encode())
 
-    def x509_validate_certificate(self, in_cert: str):
+    def x509_validate_certificate(self, in_cert: str) -> tuple[int, dict[str, bytes]]:
         return self.handler.x509_validate_certificate(in_cert.encode())

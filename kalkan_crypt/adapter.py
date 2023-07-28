@@ -1,5 +1,3 @@
-from typing import Any
-
 from .C.kalkan import KCCLient as _KCCLient
 from .interface import KalkanInterface
 
@@ -17,20 +15,20 @@ class Adapter(KalkanInterface):
     def finalize(self):
         self._kc.finalize()
 
-    def x509_export_certificate_from_store(self):
+    def x509_export_certificate_from_store(self) -> tuple[int, bytes]:
         return self._kc.x509_export_certificate_from_store()
 
     def x509_load_certificate_from_buffer(self, in_cert: str) -> int:
         return self._kc.x509_load_certificate_from_buffer(in_cert)
 
-    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, Any]:
+    def x509_certificate_get_info(self, in_cert: str) -> tuple[int, bytes]:
         return self._kc.x509_certificate_get_info(in_cert)
 
-    def sign_data(self, data):
+    def sign_data(self, data) -> tuple[int, bytes]:
         return self._kc.sign_data(data)
 
-    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, Any]]:
+    def verify_data(self, signature: str, data: str) -> tuple[int, dict[str, bytes]]:
         return self._kc.verify_data(signature, data)
 
-    def x509_validate_certificate(self, in_cert: str):
+    def x509_validate_certificate(self, in_cert: str) -> tuple[int, dict[str, bytes]]:
         return self._kc.x509_validate_certificate(in_cert)

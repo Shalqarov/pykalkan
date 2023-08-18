@@ -37,3 +37,7 @@ class KalkanInterface(ABC):
     @abstractmethod
     def x509_validate_certificate(self, in_cert: str) -> dict[str, bytes]:
         ...
+
+    @abstractmethod
+    def get_time_from_sign(self, sign: str) -> int:
+        ...

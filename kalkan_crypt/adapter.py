@@ -32,3 +32,6 @@ class Adapter(KalkanInterface):
 
     def x509_validate_certificate(self, in_cert: str) -> dict[str, bytes]:
         return self._kc.x509_validate_certificate(in_cert)
+
+    def get_time_from_sign(self, sign: str) -> int:
+        return self._kc.get_time(sign)

@@ -1,3 +1,19 @@
+class KalkanException(Exception):
+    def __init__(self, status, func_name, info=None, *args):
+        super().__init__(args)
+        self.status = status
+        self.info = info
+        self.func = func_name
+
+    def __str__(self):
+        return f"Function: {self.func}; Code: {self.status}; Error: {wrap_error(self.status)}"
+
+
+class ValidateException(KalkanException):
+    def __str__(self):
+        return f"Function: {self.func}; Code: {self.status}; Error: {wrap_error(self.status)}; Info: {self.info}"
+
+
 def wrap_error(code: int) -> str:
     return errorLabels.get(code, f"Неизвестная ошибка: {code}")
 
@@ -53,7 +69,9 @@ class ErrorCode:
     SignFormat = 149946425  # Неизвестный формат подписи
     InDataFormat = 149946426  # Неизвестный формат входных данных
     OutDataFormat = 149946427  # Неизвестный формат выходных данных
-    VerifyInitError = 149946428  # Невозможно инициализировать менеджера верификации подписи
+    VerifyInitError = (
+        149946428  # Невозможно инициализировать менеджера верификации подписи
+    )
     VerifyError = 149946429  # Не удалось верифицировать цифровую подпись
     HashError = 149946430  # Не удалось хэшировать данные
     SignHashError = 149946431  # Не удалось подписать хэшированные данные
@@ -182,8 +200,8 @@ errorLabels = {
     ErrorCode.EngineLoadErr: "Ошибка подключения (загрузки) модуля (engine)",
     ErrorCode.ParamError: "Некорректные входные данные",
     ErrorCode.CertStatusOK: "Статус сертификата – валидный. Используется при проверке сертификата по OCSP. ("
-                            "не является ошибкой, делается запись в лог)",
+    "не является ошибкой, делается запись в лог)",
     ErrorCode.CertStatusRevoked: "Статус сертификата – отозван. Используется при проверке сертификата по OCSP.",
     ErrorCode.CertStatusUnknown: "Статус сертификата – неизвестен. Используется при проверке сертификата по "
-                                 "OCSP. Например, не удалось установить издателя сертификата.",
+    "OCSP. Например, не удалось установить издателя сертификата.",
 }

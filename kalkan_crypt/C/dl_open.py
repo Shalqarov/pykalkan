@@ -292,6 +292,39 @@ class LibHandle:
         }
         return res
 
+    def get_time_from_sign(
+        self,
+        in_data: bytes,
+        flags: t.Iterable[SignatureFlag] = (
+            SignatureFlag.KC_IN_BASE64,
+            SignatureFlag.KC_OUT_BASE64,
+        ),
+    ) -> int:
+        """
+        Получить время подписи.
+        :param in_data: подпись
+        :param flags: флаги для функции(см. Документацию SDK)
+        :return: int(unix time)
+        """
+        kc_in_data = ct.c_char_p(in_data)
+        kc_in_data_length = ct.c_int(len(in_data))
+
+        flags = ct.c_int(sum([flag for flag in flags]))
+        kc_in_sig_id = ct.c_int(0)
+
+        out_time = ct.pointer(ct.c_longlong(0))
+
+        err_code = self.handle.KC_GetTimeFromSig(
+            kc_in_data,
+            kc_in_data_length,
+            flags,
+            kc_in_sig_id,
+            out_time,
+        )
+        if err_code != 0:
+            raise KalkanException(err_code, "KC_GetTimeFromSig")
+        return out_time.contents.value
+
 
 def get_libhandle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:
     """

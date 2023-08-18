@@ -33,3 +33,6 @@ class KCCLient:
 
     def x509_validate_certificate(self, in_cert: str) -> dict[str, bytes]:
         return self.handler.x509_validate_certificate(in_cert.encode())
+
+    def get_time(self, in_data: str):
+        return self.handler.get_time_from_sign(in_data.encode())

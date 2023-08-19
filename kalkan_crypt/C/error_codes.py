@@ -20,8 +20,9 @@ def wrap_error(code: int) -> str:
 
 class ErrorCode:
     OK = 0  # Нет ошибки
-    ErrorReadPKCS12 = 149946370  # Невозможно прочитать файл формата pkcs#12
-    ErrorOpenPKCS12 = 149946371  # Невозможно открыть файл формата pkcs12
+    InvalidTime = 100  # Невалидное время
+    ReadPKCS12 = 149946370  # Невозможно прочитать файл формата pkcs#12
+    OpenPKCS12 = 149946371  # Невозможно открыть файл формата pkcs12
     InvalidPropID = 149946372  # Недопустимый идентификатор расширения сертификата
     BufferTooSmall = 149946373  # Размер буфера слишком мал
     CertParseError = 149946374  # Невозможно разобрать (распарсить) сертификат
@@ -114,8 +115,9 @@ class ErrorCode:
 
 errorLabels = {
     ErrorCode.OK: "Нет ошибки",
-    ErrorCode.ErrorReadPKCS12: "Невозможно прочитать файл формата pkcs#12",
-    ErrorCode.ErrorOpenPKCS12: "Невозможно открыть файл формата pkcs12",
+    ErrorCode.InvalidTime: "Невалидное время",
+    ErrorCode.ReadPKCS12: "Невозможно прочитать файл формата pkcs#12",
+    ErrorCode.OpenPKCS12: "Невозможно открыть файл формата pkcs12",
     ErrorCode.InvalidPropID: "Недопустимый идентификатор расширения сертификата",
     ErrorCode.BufferTooSmall: "Размер буфера слишком мал",
     ErrorCode.CertParseError: "Невозможно разобрать (распарсить) сертификат",

@@ -2,7 +2,7 @@ import ctypes as ct
 import typing as t
 
 from .enums import CertCode, CertProp, SignatureFlag, ValidateType
-from .error_codes import KalkanException, ValidateException
+from .error_codes import KalkanException, ValidateException, ErrorCode
 
 VERIFY_OUT_DATA_LENGTH: t.Final[int] = 28000
 VERIFY_OUT_VERIFY_INFO_LENGTH: t.Final[int] = 64768
@@ -14,10 +14,36 @@ VALIDATE_DATA_LENGTH: t.Final[int] = 8192
 class LibHandle:
     """Хендлер для работы с dynamic lib"""
 
+    __instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
+
     def __init__(self, handle, lib_name):
         self.handle = handle
         self.lib_name = lib_name
         self._alias = ct.create_string_buffer("".encode())
+
+    @staticmethod
+    def get_libhandle(lib_path: str = "libkalkancryptwr-64.so") -> "LibHandle":
+        """
+        Подключение библиотеки.
+        :param lib_path: путь к библиотеке (/usr/lib/...)
+        :return: LibHandle
+        """
+        if not LibHandle.__instance:
+            LibHandle.__instance = LibHandle.__create_instance(lib_path)
+        return LibHandle.__instance
+
+    @staticmethod
+    def __create_instance(lib_path) -> "LibHandle":
+        lib_name = ct.c_char_p(lib_path.encode())
+        handle = ct.CDLL(lib_name.value, mode=1)
+        if handle:
+            return LibHandle(handle, lib_name.value)
+        raise OSError(f"failed to open library: {lib_name.value}")
 
     def kc_init(self):
         """
@@ -136,7 +162,7 @@ class LibHandle:
             SignatureFlag.KC_IN_BASE64,
             SignatureFlag.KC_OUT_BASE64,
             SignatureFlag.KC_WITH_CERT,
-            SignatureFlag.KC_PROXY_ON,
+            SignatureFlag.KC_WITH_TIMESTAMP,
         ),
     ) -> bytes:
         """
@@ -236,7 +262,7 @@ class LibHandle:
         self,
         in_cert: bytes,
         valid_type: ValidateType = ValidateType.KC_USE_OCSP,
-        valid_path: bytes = b"http://ocsp.pki.gov.kz",
+        valid_path: bytes = b"http://test.pki.gov.kz/ocsp/",
     ) -> dict[str, bytes]:
         """
         Осуществляет проверку сертификата:
@@ -325,15 +351,7 @@ class LibHandle:
             raise KalkanException(err_code, "KC_GetTimeFromSig")
         return out_time.contents.value
 
-
-def get_libhandle(lib_path: str = "/usr/lib/libkalkancryptwr-64.so") -> LibHandle:
-    """
-    Подключение библиотеки.
-    :param lib_path: путь к библиотеке (/usr/lib/...)
-    :return: LibHandle
-    """
-    lib_name = ct.c_char_p(lib_path.encode())
-    handle = ct.CDLL(lib_name.value, mode=1)
-    if handle is not None:
-        return LibHandle(handle, lib_name.value)
-    raise OSError(f"failed to open library: {lib_name.value}")
+    def set_tsa_url(self, url: bytes = b"http://tsp.pki.gov.kz:80"):
+        kc_url = ct.c_char_p(url)
+        if not self.handle.KC_TSASetUrl(kc_url):
+            raise KalkanException(ErrorCode.OCSPReqErr, "TSASetUrl")

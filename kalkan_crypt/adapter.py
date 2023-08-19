@@ -35,3 +35,6 @@ class Adapter(KalkanInterface):
 
     def get_time_from_sign(self, sign: str) -> int:
         return self._kc.get_time(sign)
+
+    def set_tsa_url(self):
+        self._kc.set_tsa_url()

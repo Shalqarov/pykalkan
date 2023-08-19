@@ -36,3 +36,6 @@ class KCCLient:
 
     def get_time(self, in_data: str) -> int:
         return self.handler.get_time_from_sign(in_data.encode())
+
+    def set_tsa_url(self):
+        self.handler.set_tsa_url()

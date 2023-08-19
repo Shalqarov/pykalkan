@@ -115,8 +115,9 @@ class ErrorCode:
 
 errorLabels = {
     ErrorCode.OK: "Нет ошибки",
-    ErrorCode.ErrorReadPKCS12: "Невозможно прочитать файл формата pkcs#12",
-    ErrorCode.ErrorOpenPKCS12: "Невозможно открыть файл формата pkcs12",
+    ErrorCode.InvalidTime: "Невалидное время",
+    ErrorCode.ReadPKCS12: "Невозможно прочитать файл формата pkcs#12",
+    ErrorCode.OpenPKCS12: "Невозможно открыть файл формата pkcs12",
     ErrorCode.InvalidPropID: "Недопустимый идентификатор расширения сертификата",
     ErrorCode.BufferTooSmall: "Размер буфера слишком мал",
     ErrorCode.CertParseError: "Невозможно разобрать (распарсить) сертификат",

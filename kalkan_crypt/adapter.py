@@ -7,10 +7,10 @@ class Adapter(KalkanInterface):
         self._kc = _KCCLient(lib)
 
     def init(self):
-        return self._kc.kc_init()
+        self._kc.kc_init()
 
     def load_key_store(self, cert_path: str, cert_password: str):
-        return self._kc.load_key_store(cert_path, cert_password)
+        self._kc.load_key_store(cert_path, cert_password)
 
     def finalize(self):
         self._kc.finalize()
@@ -19,7 +19,7 @@ class Adapter(KalkanInterface):
         return self._kc.x509_export_certificate_from_store()
 
     def x509_load_certificate_from_buffer(self, in_cert: str):
-        return self._kc.x509_load_certificate_from_buffer(in_cert)
+        self._kc.x509_load_certificate_from_buffer(in_cert)
 
     def x509_certificate_get_info(self, in_cert: str) -> bytes:
         return self._kc.x509_certificate_get_info(in_cert)

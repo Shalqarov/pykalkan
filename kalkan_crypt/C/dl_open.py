@@ -10,6 +10,8 @@ VERIFY_OUT_CERT_LENGTH: t.Final[int] = 64768
 
 VALIDATE_DATA_LENGTH: t.Final[int] = 8192
 
+CERT_SIZE: t.Final[int] = 32768
+
 
 class LibHandle:
     """Хендлер для работы с dynamic lib"""
@@ -24,6 +26,13 @@ class LibHandle:
             if not cls.__instance.handle:
                 raise OSError(f"failed to open library: {lib_path}")
         return cls.__instance
+
+    @staticmethod
+    def __handle_error(error_code: int, method_name: str, info: t.Optional[str] = None):
+        if error_code != 0:
+            raise ValidateException(
+                error_code, method_name, info
+            ) if info else KalkanException(error_code, method_name)
 
     def kc_init(self):
         """
@@ -261,12 +270,11 @@ class LibHandle:
 
         kc_valid_type = ct.c_int(valid_type)
 
-        data_len = 8192
-        out_info = ct.create_string_buffer(data_len)
-        out_info_len = ct.c_int(data_len)
+        out_info = ct.create_string_buffer(VALIDATE_DATA_LENGTH)
+        out_info_len = ct.c_int(VALIDATE_DATA_LENGTH)
 
-        resp = ct.create_string_buffer(data_len)
-        resp_len = ct.c_int(data_len)
+        resp = ct.create_string_buffer(VALIDATE_DATA_LENGTH)
+        resp_len = ct.c_int(VALIDATE_DATA_LENGTH)
 
         err_code = self.handle.X509ValidateCertificate(
             kc_in_cert,

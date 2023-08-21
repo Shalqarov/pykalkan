@@ -16,34 +16,14 @@ class LibHandle:
 
     __instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, lib_path: str):
         if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
+            cls.__instance = super(LibHandle, cls).__new__(cls)
+            cls.__instance.handle = ct.CDLL(lib_path, mode=1)
+            cls.__instance._alias = ct.create_string_buffer("".encode())
+            if not cls.__instance.handle:
+                raise OSError(f"failed to open library: {lib_path}")
         return cls.__instance
-
-    def __init__(self, handle, lib_name):
-        self.handle = handle
-        self.lib_name = lib_name
-        self._alias = ct.create_string_buffer("".encode())
-
-    @staticmethod
-    def get_libhandle(lib_path: str = "libkalkancryptwr-64.so") -> "LibHandle":
-        """
-        Подключение библиотеки.
-        :param lib_path: путь к библиотеке (/usr/lib/...)
-        :return: LibHandle
-        """
-        if not LibHandle.__instance:
-            LibHandle.__instance = LibHandle.__create_instance(lib_path)
-        return LibHandle.__instance
-
-    @staticmethod
-    def __create_instance(lib_path) -> "LibHandle":
-        lib_name = ct.c_char_p(lib_path.encode())
-        handle = ct.CDLL(lib_name.value, mode=1)
-        if handle:
-            return LibHandle(handle, lib_name.value)
-        raise OSError(f"failed to open library: {lib_name.value}")
 
     def kc_init(self):
         """
@@ -221,7 +201,7 @@ class LibHandle:
         data_length = ct.c_int(len(in_data))
 
         inout_sign_length = ct.c_int(len(in_sign))
-        inout_sign = (ct.c_ubyte * len(in_sign)).from_buffer_copy(in_sign)
+        inout_sign = ct.c_char_p(in_sign)
 
         out_data = ct.create_string_buffer(VERIFY_OUT_DATA_LENGTH)
         out_data_length = ct.byref(ct.c_int(VERIFY_OUT_DATA_LENGTH))

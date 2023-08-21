@@ -2,7 +2,7 @@ import ctypes as ct
 import typing as t
 
 from .enums import CertCode, CertProp, SignatureFlag, ValidateType
-from .error_codes import KalkanException, ValidateException, ErrorCode
+from .error_codes import KalkanException, ValidateException
 
 VERIFY_OUT_DATA_LENGTH: t.Final[int] = 28000
 VERIFY_OUT_VERIFY_INFO_LENGTH: t.Final[int] = 64768
@@ -29,8 +29,7 @@ class LibHandle:
         """
         KC_Init() - Инициализация библиотеки.
         """
-        if err_code := self.handle.Init() != 0:
-            raise KalkanException(err_code, "KC_INIT")
+        self.__handle_error(self.handle.Init(), "KC_INIT")
 
     def kc_load_key_store(
         self, path: str, password: str, store_type=1, alias: str = ""
@@ -54,8 +53,7 @@ class LibHandle:
             ct.c_int(len(path)),
             c_alias,
         )
-        if err_code != 0:
-            raise KalkanException(err_code, "KC_LoadKeyStore")
+        self.__handle_error(err_code, "KC_LoadKeyStore")
 
     def kc_finalize(self):
         """Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки."""
@@ -68,8 +66,8 @@ class LibHandle:
         """
 
         flags = ct.c_int(1)
-        cert_len = ct.pointer(ct.c_int(32768))
-        public_cert = ct.create_string_buffer(32768)
+        cert_len = ct.pointer(ct.c_int(CERT_SIZE))
+        public_cert = ct.create_string_buffer(CERT_SIZE)
 
         err_code = self.handle.X509ExportCertificateFromStore(
             self._alias,
@@ -77,9 +75,7 @@ class LibHandle:
             public_cert,
             cert_len,
         )
-
-        if err_code != 0:
-            raise KalkanException(err_code, "X509ExportCertificateFromStore")
+        self.__handle_error(err_code, "X509ExportCertificateFromStore")
         return public_cert.value
 
     def x509_load_certificate_from_buffer(
@@ -98,8 +94,7 @@ class LibHandle:
         err_code = self.handle.X509LoadCertificateFromBuffer(
             kc_in_cert, kc_in_cert_len, kc_cert_code
         )
-        if err_code != 0:
-            raise KalkanException(err_code, "X509LoadCertificateFromBuffer")
+        self.__handle_error(err_code, "X509LoadCertificateFromBuffer")
 
     def x509_certificate_get_info(
         self, in_cert: bytes, prop: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
@@ -130,8 +125,7 @@ class LibHandle:
             out_data,
             ct.pointer(ct.c_int(out_data_len)),
         )
-        if err_code != 0:
-            raise KalkanException(err_code, "X509CertificateGetInfo")
+        self.__handle_error(err_code, "X509CertificateGetInfo")
         return out_data.value
 
     def sign_data(
@@ -168,8 +162,7 @@ class LibHandle:
             signed_data,
             ct.pointer(ct.c_int(len(data_to_sign) * 2 + 50000)),
         )
-        if err_code != 0:
-            raise KalkanException(err_code, "SignData")
+        self.__handle_error(err_code, "SignData")
         return signed_data.value
 
     def verify_data(
@@ -228,14 +221,12 @@ class LibHandle:
             out_cert,
             out_cert_length,
         )
-
-        if err_code != 0:
-            raise ValidateException(err_code, "VerifyData", out_verify_info.value)
         result = {
             "Cert": out_cert.value,
             "Info": out_verify_info.value,
             "Data": out_data.value,
         }
+        self.__handle_error(err_code, "VerifyData", result.get("Info"))
         return result
 
     def x509_validate_certificate(
@@ -289,13 +280,11 @@ class LibHandle:
             resp,
             ct.pointer(resp_len),
         )
-
-        if err_code != 0:
-            raise ValidateException(err_code, "X509ValidateCertificate", out_info.value)
         res = {
             "response": resp.value,
             "info": out_info.value,
         }
+        self.__handle_error(err_code, "X509ValidateCertificate", res.get("info"))
         return res
 
     def get_time_from_sign(
@@ -327,11 +316,9 @@ class LibHandle:
             kc_in_sig_id,
             out_time,
         )
-        if err_code != 0:
-            raise KalkanException(err_code, "KC_GetTimeFromSig")
+        self.__handle_error(err_code, "KC_GetTimeFromSig")
         return out_time.contents.value
 
     def set_tsa_url(self, url: bytes = b"http://tsp.pki.gov.kz:80"):
         kc_url = ct.c_char_p(url)
-        if not self.handle.KC_TSASetUrl(kc_url):
-            raise KalkanException(ErrorCode.OCSPReqErr, "TSASetUrl")
+        self.handle.KC_TSASetUrl(kc_url)

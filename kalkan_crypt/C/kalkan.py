@@ -5,7 +5,7 @@ class KCCLient:
     """Логика вызова методов из библиотеки"""
 
     def __init__(self, lib: str):
-        self.handler = LibHandle.get_libhandle(lib)
+        self.handler = LibHandle(lib)
 
     def kc_init(self):
         self.handler.kc_init()

@@ -1,5 +1,5 @@
 from pykalkan.enums import ValidateType
-from .dl_open import LibHandle
+from .lib_handle import LibHandle
 
 
 class KCCLient:

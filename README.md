@@ -26,15 +26,16 @@ pip install pykalkan
 
 Вот пример использования библиотеки Kalkan Crypt для проверки ЭЦП на валидность:
 
-```python
-import sys
+> Внимание! Динамическая библиотека не предназначена для одновременного обращения к ней
 
-from kalkan_crypt import Adapter, ValidateException, KalkanException
+```python
+from pykalkan import Adapter
+from pykalkan.exceptions import ValidateException, KalkanException
 
 lib = "libkalkancryptwr-64.so"
 
 
-def main(sign: str, verify_data: str):
+def main(sign: str, verify_data: str, crl_path: str):
     try:
         kc = Adapter(lib)
         kc.init()
@@ -42,7 +43,8 @@ def main(sign: str, verify_data: str):
             sign,
             verify_data,
         )
-        _ = kc.x509_validate_certificate(res["Cert"].decode())
+        cert = res["Cert"].decode()
+        kc.x509_validate_certificate_crl(cert, crl_path)
     except ValidateException as ve:
         print(f"Validate failed: {ve}")
     except KalkanException as ke:
@@ -50,8 +52,6 @@ def main(sign: str, verify_data: str):
     else:
         kc.finalize()
 ```
-
-> Внимание! Динамическая библиотека не предназначена для одновременного обращения к ней
 
 На данный момент (на 21.08.23) реализованы следующие функции из библиотеки:
 

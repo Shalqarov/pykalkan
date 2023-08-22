@@ -1,0 +1,25 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pykalkan"
+version = "0.6.0"
+authors = [
+    { name = "Shalkarov Temirlan", email = "shalqarov01@gmail.com" },
+]
+description = "Адаптер(Python) для работы с ЭЦП РК"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/shalqarov/pykalkan"
+"Bug Tracker" = "https://github.com/shalqarov/pykalkan/issues"

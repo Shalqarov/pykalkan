@@ -1,5 +1,6 @@
 *.cer
 *.p12
+*.crl
 
 
 # Byte-compiled / optimized / DLL files

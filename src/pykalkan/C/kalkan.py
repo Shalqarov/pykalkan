@@ -1,3 +1,4 @@
+from pykalkan.enums import ValidateType
 from .dl_open import LibHandle
 
 
@@ -31,8 +32,18 @@ class KCCLient:
     def verify_data(self, signature: str, data: str) -> dict[str, bytes]:
         return self.handler.verify_data(signature.encode(), in_data=data.encode())
 
-    def x509_validate_certificate(self, in_cert: str) -> dict[str, bytes]:
-        return self.handler.x509_validate_certificate(in_cert.encode())
+    def x509_validate_certificate_ocsp(self, in_cert: str) -> dict[str, bytes]:
+        return self.handler.x509_validate_certificate(
+            in_cert.encode(),
+            ValidateType.KC_USE_OCSP,
+        )
+
+    def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:
+        return self.handler.x509_validate_certificate(
+            in_cert.encode(),
+            ValidateType.KC_USE_CRL,
+            crl_path.encode(),
+        )
 
     def get_time(self, in_data: str) -> int:
         return self.handler.get_time_from_sign(in_data.encode())

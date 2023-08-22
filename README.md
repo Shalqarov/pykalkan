@@ -1,4 +1,10 @@
-## Работа с ЭЦП (Kalkan Crypt)
+# pykalkan
+
+## Установка:
+
+```shell
+pip install pykalkan
+```
 
 Для работы с ЭЦП (Электронной Цифровой Подписью) используется библиотека Kalkan Crypt. Вам необходимо выполнить
 следующие шаги:
@@ -19,9 +25,10 @@
 Вот пример использования библиотеки Kalkan Crypt для проверки ЭЦП на валидность:
 
 ```python
-import sys
+import os
 
-from kalkan_crypt import Adapter, ValidateException, KalkanException
+from pykalkan import Adapter
+from pykalkan.exceptions import ValidateException, KalkanException
 
 lib = "libkalkancryptwr-64.so"
 
@@ -34,7 +41,9 @@ def main(sign: str, verify_data: str):
             sign,
             verify_data,
         )
-        _ = kc.x509_validate_certificate(res["Cert"].decode())
+        cert = res["Cert"].decode()
+        kc.x509_validate_certificate_ocsp(cert)
+        kc.x509_validate_certificate_crl(cert, os.getenv("CRL_PATH"))
     except ValidateException as ve:
         print(f"Validate failed: {ve}")
     except KalkanException as ke:

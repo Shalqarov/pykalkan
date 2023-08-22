@@ -4,8 +4,8 @@ import time
 import pytest
 from dotenv import load_dotenv
 
-from kalkan_crypt.C.error_codes import KalkanException, ValidateException, ErrorCode
-from kalkan_crypt.adapter import Adapter
+from pykalkan import Adapter
+from pykalkan.exceptions import KalkanException, ValidateException, ErrorCode
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ def test_main(path, password):
         kc.load_key_store(path, password)
         data = kc.sign_data("SGVsbG8sIFdvcmxkIQ==")
         if not is_valid_date(kc.get_time_from_sign(data.decode())):
-            raise KalkanException(ErrorCode.InvalidTime, "GET TIME")
+            raise KalkanException(ErrorCode.INVALID_TIME, "GET TIME")
         res = kc.verify_data(
             data.decode(),
             "SGVsbG8sIFdvcmxkIQ==",

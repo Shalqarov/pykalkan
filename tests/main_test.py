@@ -31,7 +31,9 @@ def test_main(path, password):
             data.decode(),
             "SGVsbG8sIFdvcmxkIQ==",
         )
-        _ = kc.x509_validate_certificate(res["Cert"].decode())
+        cert = res["Cert"].decode()
+        kc.x509_validate_certificate_ocsp(cert)
+        kc.x509_validate_certificate_crl(cert, os.getenv("CRL_PATH"))
     except ValidateException as ve:
         assert False, f"Validate failed: {ve}"
     except KalkanException as ke:

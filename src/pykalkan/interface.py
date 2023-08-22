@@ -39,7 +39,7 @@ class KalkanInterface(ABC):
         pass
 
     @abstractmethod
-    def x509_validate_certificate_crl(self, in_cert: str) -> dict[str, bytes]:
+    def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:
         pass
 
     @abstractmethod

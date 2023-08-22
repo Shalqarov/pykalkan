@@ -38,10 +38,11 @@ class KCCLient:
             ValidateType.KC_USE_OCSP,
         )
 
-    def x509_validate_certificate_crl(self, in_cert: str) -> dict[str, bytes]:
+    def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:
         return self.handler.x509_validate_certificate(
             in_cert.encode(),
             ValidateType.KC_USE_CRL,
+            crl_path.encode(),
         )
 
     def get_time(self, in_data: str) -> int:

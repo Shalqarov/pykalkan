@@ -32,9 +32,9 @@ class Adapter(KalkanInterface):
 
     def x509_validate_certificate_ocsp(self, in_cert: str) -> dict[str, bytes]:
         return self._kc.x509_validate_certificate_ocsp(in_cert)
-    
-    def x509_validate_certificate_crl(self, in_cert: str) -> dict[str, bytes]:
-        return self._kc.x509_validate_certificate_crl(in_cert)
+
+    def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:
+        return self._kc.x509_validate_certificate_crl(in_cert, crl_path)
 
     def get_time_from_sign(self, sign: str) -> int:
         return self._kc.get_time(sign)

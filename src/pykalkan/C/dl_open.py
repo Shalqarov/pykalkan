@@ -1,8 +1,8 @@
 import ctypes as ct
 import typing as t
 
-from .enums import CertCode, CertProp, SignatureFlag, ValidateType
-from .error_codes import KalkanException, ValidateException
+from pykalkan.enums import CertCode, CertProp, SignatureFlag, ValidateType
+from pykalkan.exceptions import KalkanException, ValidateException
 
 VERIFY_OUT_DATA_LENGTH: t.Final[int] = 28000
 VERIFY_OUT_VERIFY_INFO_LENGTH: t.Final[int] = 64768
@@ -41,7 +41,7 @@ class LibHandle:
         self.__handle_error(self.handle.Init(), "KC_INIT")
 
     def kc_load_key_store(
-        self, path: str, password: str, store_type=1, alias: str = ""
+            self, path: str, password: str, store_type=1, alias: str = ""
     ):
         """
         Загрузка ключей/сертификата их хранилища.
@@ -88,7 +88,7 @@ class LibHandle:
         return public_cert.value
 
     def x509_load_certificate_from_buffer(
-        self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64
+            self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64
     ):
         """
         Загрузка сертификата из памяти.
@@ -106,7 +106,7 @@ class LibHandle:
         self.__handle_error(err_code, "X509LoadCertificateFromBuffer")
 
     def x509_certificate_get_info(
-        self, in_cert: bytes, prop: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
+            self, in_cert: bytes, prop: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
     ) -> bytes:
         """
         Обеспечивает получение значений полей/расширений из сертификата.
@@ -138,15 +138,15 @@ class LibHandle:
         return out_data.value
 
     def sign_data(
-        self,
-        data: bytes,
-        flags: t.Iterable[SignatureFlag] = (
-            SignatureFlag.KC_SIGN_CMS,
-            SignatureFlag.KC_IN_BASE64,
-            SignatureFlag.KC_OUT_BASE64,
-            SignatureFlag.KC_WITH_CERT,
-            SignatureFlag.KC_WITH_TIMESTAMP,
-        ),
+            self,
+            data: bytes,
+            flags: t.Iterable[SignatureFlag] = (
+                    SignatureFlag.KC_SIGN_CMS,
+                    SignatureFlag.KC_IN_BASE64,
+                    SignatureFlag.KC_OUT_BASE64,
+                    SignatureFlag.KC_WITH_CERT,
+                    SignatureFlag.KC_WITH_TIMESTAMP,
+            ),
     ) -> bytes:
         """
         Подписывает данные.
@@ -175,17 +175,17 @@ class LibHandle:
         return signed_data.value
 
     def verify_data(
-        self,
-        in_sign: bytes,
-        in_data: bytes = b"",
-        flags: t.Iterable[SignatureFlag] = (
-            SignatureFlag.KC_SIGN_CMS,
-            SignatureFlag.KC_IN_BASE64,
-            SignatureFlag.KC_IN2_BASE64,
-            SignatureFlag.KC_DETACHED_DATA,
-            SignatureFlag.KC_WITH_CERT,
-            SignatureFlag.KC_OUT_BASE64,
-        ),
+            self,
+            in_sign: bytes,
+            in_data: bytes = b"",
+            flags: t.Iterable[SignatureFlag] = (
+                    SignatureFlag.KC_SIGN_CMS,
+                    SignatureFlag.KC_IN_BASE64,
+                    SignatureFlag.KC_IN2_BASE64,
+                    SignatureFlag.KC_DETACHED_DATA,
+                    SignatureFlag.KC_WITH_CERT,
+                    SignatureFlag.KC_OUT_BASE64,
+            ),
     ) -> dict[str, bytes]:
         """
         Обеспечивает проверку подписи.
@@ -239,10 +239,10 @@ class LibHandle:
         return result
 
     def x509_validate_certificate(
-        self,
-        in_cert: bytes,
-        valid_type: ValidateType = ValidateType.KC_USE_OCSP,
-        valid_path: bytes = b"http://test.pki.gov.kz/ocsp/",
+            self,
+            in_cert: bytes,
+            valid_type: ValidateType = ValidateType.KC_USE_OCSP,
+            valid_path: bytes = b"http://test.pki.gov.kz/ocsp/",
     ) -> dict[str, bytes]:
         """
         Осуществляет проверку сертификата:
@@ -296,12 +296,12 @@ class LibHandle:
         return res
 
     def get_time_from_sign(
-        self,
-        in_data: bytes,
-        flags: t.Iterable[SignatureFlag] = (
-            SignatureFlag.KC_IN_BASE64,
-            SignatureFlag.KC_OUT_BASE64,
-        ),
+            self,
+            in_data: bytes,
+            flags: t.Iterable[SignatureFlag] = (
+                    SignatureFlag.KC_IN_BASE64,
+                    SignatureFlag.KC_OUT_BASE64,
+            ),
     ) -> int:
         """
         Получить время подписи.

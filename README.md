@@ -16,38 +16,36 @@
 
 ## Пример работы с библиотекой Kalkan Crypt
 
-Вот пример использования библиотеки Kalkan Crypt для проверки ЭЦП:
+Вот пример использования библиотеки Kalkan Crypt для проверки ЭЦП на валидность:
 
 ```python
-from kalkan_crypt import Adapter, ErrorCode
+import sys
+
+from kalkan_crypt import Adapter, ValidateException, KalkanException
 
 lib = "libkalkancryptwr-64.so"
 
 
-def validate_sign(sign: str, verify_data: str) -> tuple[int, str]:
-    """
-    Функция для валидации ЭЦП
-    """
-    cli = Adapter(lib)
-    status_code, result = cli.verify_data(sign, verify_data)
-    if status_code != 0:
-        return status_code, "non-valid sign"
-    cert = result["Cert"].decode("utf-8")
-
-    status_code, result = cli.x509_validate_certificate_ocsp(cert)
-    if status_code == ErrorCode.OCSPConnectionErr:
-        status_code, result = cli.x509_validate_certificate_crl(cert)
-    if status_code != 0:
-        return status_code, "non-valid cert"
-    info = result["info"].decode("utf-8")
-
-    status_code, _ = cli.x509_certificate_get_info(cert)
-    if status_code != 0:
-        return ErrorCode.GetCertPropErr
-    return status_code, info
+def main(sign: str, verify_data: str):
+    try:
+        kc = Adapter(lib)
+        kc.init()
+        res = kc.verify_data(
+            sign,
+            verify_data,
+        )
+        _ = kc.x509_validate_certificate(res["Cert"].decode())
+    except ValidateException as ve:
+        print(f"Validate failed: {ve}")
+    except KalkanException as ke:
+        print(f"Kalkan Exception failed: {ke}")
+    else:
+        kc.finalize()
 ```
 
-На данный момент (на 31.07.23) реализованы следующие функции из библиотеки:
+> Внимание! Динамическая библиотека не предназначена для одновременного обращения к ней
+
+На данный момент (на 21.08.23) реализованы следующие функции из библиотеки:
 
 - KC_Init
 - KC_LoadKeyStore
@@ -58,3 +56,5 @@ def validate_sign(sign: str, verify_data: str) -> tuple[int, str]:
 - X509LoadCertificateFromStore
 - X509CertificateGetInfo
 - X509ValidateCertificate (CRL + OCSP)
+- TSASetUrl
+- GetTimeFromSign

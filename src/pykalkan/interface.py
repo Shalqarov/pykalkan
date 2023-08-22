@@ -35,7 +35,11 @@ class KalkanInterface(ABC):
         pass
 
     @abstractmethod
-    def x509_validate_certificate(self, in_cert: str) -> dict[str, bytes]:
+    def x509_validate_certificate_ocsp(self, in_cert: str) -> dict[str, bytes]:
+        pass
+
+    @abstractmethod
+    def x509_validate_certificate_crl(self, in_cert: str) -> dict[str, bytes]:
         pass
 
     @abstractmethod

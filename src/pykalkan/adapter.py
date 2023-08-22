@@ -1,3 +1,5 @@
+import threading
+
 from .C.kalkan import KCCLient as _KCCLient
 from .interface import KalkanInterface
 
@@ -8,17 +10,20 @@ class Adapter(KalkanInterface):
     Класс, представляющий адаптер для криптографической библиотеки Kalkan.
     """
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls, lib: str):
-        if cls._instance is None:
-            cls._instance = super(Adapter, cls).__new__(cls)
-            cls._instance._kc = _KCCLient(lib)
-            cls._instance.init()
-        return cls._instance
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(Adapter, cls).__new__(cls)
+                cls._instance._kc = _KCCLient(lib)
+                cls._instance.init()
+            return cls._instance
 
     def init(self):
         """Инициализация библиотеки.."""
-        self._kc.kc_init()
+        with self._lock:
+            self._kc.kc_init()
 
     def load_key_store(self, cert_path: str, cert_password: str):
         """
@@ -26,25 +31,29 @@ class Adapter(KalkanInterface):
         :param cert_path: str - Путь к файлу сертификата.
         :param cert_password: str - Пароль для сертификата.
         """
-        self._kc.load_key_store(cert_path, cert_password)
+        with self._lock:
+            self._kc.load_key_store(cert_path, cert_password)
 
     def finalize(self):
         """Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки."""
-        self._kc.finalize()
+        with self._lock:
+            self._kc.finalize()
 
     def x509_export_certificate_from_store(self) -> bytes:
         """
         Экспорт сертификата из хранилища.
         :return: bytes - Экспортированный сертификат.
         """
-        return self._kc.x509_export_certificate_from_store()
+        with self._lock:
+            return self._kc.x509_export_certificate_from_store()
 
     def x509_load_certificate_from_buffer(self, in_cert: str):
         """
         Загрузка сертификата из памяти.
         :param in_cert: str - сертификат.
         """
-        self._kc.x509_load_certificate_from_buffer(in_cert)
+        with self._lock:
+            self._kc.x509_load_certificate_from_buffer(in_cert)
 
     def x509_certificate_get_info(self, in_cert: str) -> bytes:
         """
@@ -52,7 +61,8 @@ class Adapter(KalkanInterface):
         :param in_cert: str - Сертификат, для которого необходимо получить информацию.
         :return: bytes - Информация о сертификате.
         """
-        return self._kc.x509_certificate_get_info(in_cert)
+        with self._lock:
+            return self._kc.x509_certificate_get_info(in_cert)
 
     def sign_data(self, data) -> bytes:
         """
@@ -60,7 +70,8 @@ class Adapter(KalkanInterface):
         :param data - Данные для подписи.
         :return: bytes - Подписанные данные.
         """
-        return self._kc.sign_data(data)
+        with self._lock:
+            return self._kc.sign_data(data)
 
     def verify_data(self, signature: str, data: str) -> dict[str, bytes]:
         """
@@ -69,7 +80,8 @@ class Adapter(KalkanInterface):
         :param data: str - Проверяемые данные.
         :return: dict[str, bytes] - Словарь, содержащий результат проверки.
         """
-        return self._kc.verify_data(signature, data)
+        with self._lock:
+            return self._kc.verify_data(signature, data)
 
     def x509_validate_certificate_ocsp(self, in_cert: str) -> dict[str, bytes]:
         """
@@ -77,7 +89,8 @@ class Adapter(KalkanInterface):
         :param in_cert: str - Сертификат для проверки.
         :return: dict[str, bytes] - Словарь, содержащий результат проверки.
         """
-        return self._kc.x509_validate_certificate_ocsp(in_cert)
+        with self._lock:
+            return self._kc.x509_validate_certificate_ocsp(in_cert)
 
     def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:
         """
@@ -86,7 +99,8 @@ class Adapter(KalkanInterface):
         :param crl_path: str - Путь к файлу CRL.
         :return: dict[str, bytes] - Словарь, содержащий результат проверки.
         """
-        return self._kc.x509_validate_certificate_crl(in_cert, crl_path)
+        with self._lock:
+            return self._kc.x509_validate_certificate_crl(in_cert, crl_path)
 
     def get_time_from_sign(self, sign: str) -> int:
         """
@@ -94,10 +108,12 @@ class Adapter(KalkanInterface):
         :param sign: str - подпись, из которой нужно извлечь временную метку.
         :return: int - временная метка.
         """
-        return self._kc.get_time(sign)
+        with self._lock:
+            return self._kc.get_time(sign)
 
     def set_tsa_url(self):
         """
         Установка адреса сервиса TSA.
         """
-        self._kc.set_tsa_url()
+        with self._lock:
+            self._kc.set_tsa_url()

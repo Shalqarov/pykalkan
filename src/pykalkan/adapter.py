@@ -19,6 +19,9 @@ class Adapter(KalkanInterface):
             cls._instance.init()
         return cls._instance
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._kc.finalize()
+
     def init(self):
         """Инициализация библиотеки.."""
         with self._lock:

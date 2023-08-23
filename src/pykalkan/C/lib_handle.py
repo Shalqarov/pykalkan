@@ -300,7 +300,6 @@ class LibHandle:
             in_data: bytes,
             flags: t.Iterable[SignatureFlag] = (
                     SignatureFlag.KC_IN_BASE64,
-                    SignatureFlag.KC_OUT_BASE64,
             ),
     ) -> int:
         """

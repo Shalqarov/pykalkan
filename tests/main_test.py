@@ -10,6 +10,7 @@ from pykalkan.exceptions import KalkanException, ValidateException, ErrorCode
 load_dotenv()
 
 library = "libkalkancryptwr-64.so"
+data_to_sign = "SGVsbG8sIFdvcmxkIQ=="
 
 
 @pytest.mark.parametrize(
@@ -24,12 +25,12 @@ def test_main(path, password):
         kc.init()
         kc.set_tsa_url()
         kc.load_key_store(path, password)
-        data = kc.sign_data("SGVsbG8sIFdvcmxkIQ==")
+        data = kc.sign_data(data_to_sign)
         if not is_valid_date(kc.get_time_from_sign(data.decode())):
             raise KalkanException(ErrorCode.INVALID_TIME, "GET TIME")
         res = kc.verify_data(
             data.decode(),
-            "SGVsbG8sIFdvcmxkIQ==",
+            data_to_sign,
         )
         cert = res["Cert"].decode()
         kc.x509_validate_certificate_ocsp(cert)

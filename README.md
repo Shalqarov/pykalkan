@@ -27,32 +27,50 @@ pip install pykalkan
 Вот пример использования библиотеки Kalkan Crypt для проверки ЭЦП на валидность:
 
 > Внимание! Динамическая библиотека не предназначена для одновременного обращения к ней
+---
+
+### Подключение библиотеки и загрузка хранилища ключей
 
 ```python
 from pykalkan import Adapter
-from pykalkan.exceptions import ValidateException, KalkanException
 
 lib = "libkalkancryptwr-64.so"
 
-
-def main(sign: str, verify_data: str, crl_path: str):
-    try:
-        kc = Adapter(lib)
-        kc.init()
-        res = kc.verify_data(
-            sign,
-            verify_data,
-        )
-        cert = res["Cert"].decode()
-        kc.x509_validate_certificate_crl(cert, crl_path)
-    except ValidateException as ve:
-        print(f"Validate failed: {ve}")
-    except KalkanException as ke:
-        print(f"Kalkan Exception failed: {ke}")
-    else:
-        kc.finalize()
+kc = Adapter(lib)
+kc.init()
+kc.load_key_store(cert_path, cert_password)
+kc.set_tsa_url()
 ```
 
+---
+
+### Подпись данных в виде base64 строки
+
+```python
+...
+data = "SGVsbG8sIFdvcmxkIQ=="
+
+signed_data = adapter.sign_data(data)
+...
+```
+
+---
+
+### Проверка подписи на валидность и отозванность *(OCSP или CRL)*
+
+```python
+...
+res = adapter.verify_data(signed_data, data_to_verify)
+
+cert = res.get("Cert").decode()
+
+validate_result = adapter.x509_validate_certificate_ocsp(cert)  # OCSP
+#  или
+validate_result = adapter.x509_validate_certificate_crl(cert, path_to_crl_file)  # CRL
+...
+```
+
+---
 На данный момент (на 21.08.23) реализованы следующие функции из библиотеки:
 
 - KC_Init

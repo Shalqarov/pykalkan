@@ -10,15 +10,14 @@ class Adapter(KalkanInterface):
     Класс, представляющий адаптер для криптографической библиотеки Kalkan.
     """
     _instance = None
-    _lock = threading.Lock()
 
     def __new__(cls, lib: str):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super(Adapter, cls).__new__(cls)
-                cls._instance._kc = _KCCLient(lib)
-                cls._instance.init()
-            return cls._instance
+        if cls._instance is None:
+            cls._instance = super(Adapter, cls).__new__(cls)
+            cls._lock = threading.Lock()
+            cls._instance._kc = _KCCLient(lib)
+            cls._instance.init()
+        return cls._instance
 
     def init(self):
         """Инициализация библиотеки.."""

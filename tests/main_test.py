@@ -9,7 +9,7 @@ from pykalkan.exceptions import KalkanException, ValidateException, ErrorCode
 
 load_dotenv()
 
-library = "libkalkancryptwr-64.so.2.0.2"
+library = "libkalkancryptwr-64.so"
 
 
 @pytest.mark.parametrize(

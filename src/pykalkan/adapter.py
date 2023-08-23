@@ -120,7 +120,7 @@ class Adapter(KalkanInterface):
         with self._lock:
             return self._kc.verify_data(signature.encode(), data.encode(), flags)
 
-    def x509_validate_certificate_ocsp(self, in_cert: str) -> dict[str, bytes]:
+    def x509_validate_certificate_ocsp(self, in_cert: str, url: str = "http://ocsp.pki.gov.kz") -> dict[str, bytes]:
         """
         Проверка заданного сертификата на валидность с помощью OCSP.
 
@@ -129,13 +129,14 @@ class Adapter(KalkanInterface):
         http://ocsp.pki.gov.kz - Боевой ocsp сервис
 
         :param in_cert: str - Сертификат для проверки.
+        :param url: адрес сервиса
         :return: dict[str, bytes] - Словарь, содержащий результат проверки.
         """
         with self._lock:
             return self._kc.x509_validate_certificate(
                 in_cert.encode(),
                 ValidateType.KC_USE_OCSP,
-                b"http://test.pki.gov.kz/ocsp/"
+                url.encode()
             )
 
     def x509_validate_certificate_crl(self, in_cert: str, crl_path: str) -> dict[str, bytes]:

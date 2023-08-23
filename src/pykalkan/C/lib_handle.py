@@ -40,9 +40,7 @@ class LibHandle:
         """
         self.__handle_error(self.handle.Init(), "KC_INIT")
 
-    def kc_load_key_store(
-            self, path: str, password: str, store_type=1, alias: str = ""
-    ):
+    def kc_load_key_store(self, path: str, password: str, store_type: int, alias: str):
         """
         Загрузка ключей/сертификата их хранилища.
         :param path: название/путь хранилища
@@ -87,9 +85,7 @@ class LibHandle:
         self.__handle_error(err_code, "X509ExportCertificateFromStore")
         return public_cert.value
 
-    def x509_load_certificate_from_buffer(
-            self, in_cert: bytes, cert_code: CertCode = CertCode.KC_CERT_B64
-    ):
+    def x509_load_certificate_from_buffer(self, in_cert: bytes, cert_code: CertCode):
         """
         Загрузка сертификата из памяти.
 
@@ -105,9 +101,7 @@ class LibHandle:
         )
         self.__handle_error(err_code, "X509LoadCertificateFromBuffer")
 
-    def x509_certificate_get_info(
-            self, in_cert: bytes, prop: CertProp = CertProp.KC_SUBJECT_ORGUNIT_NAME
-    ) -> bytes:
+    def x509_certificate_get_info(self, in_cert: bytes, prop: CertProp) -> bytes:
         """
         Обеспечивает получение значений полей/расширений из сертификата.
         Сертификат должен быть предварительно загружен с помощью одной из функций:
@@ -137,17 +131,7 @@ class LibHandle:
         self.__handle_error(err_code, "X509CertificateGetInfo")
         return out_data.value
 
-    def sign_data(
-            self,
-            data: bytes,
-            flags: t.Iterable[SignatureFlag] = (
-                    SignatureFlag.KC_SIGN_CMS,
-                    SignatureFlag.KC_IN_BASE64,
-                    SignatureFlag.KC_OUT_BASE64,
-                    SignatureFlag.KC_WITH_CERT,
-                    SignatureFlag.KC_WITH_TIMESTAMP,
-            ),
-    ) -> bytes:
+    def sign_data(self, data: bytes, flags: t.Iterable[SignatureFlag]) -> bytes:
         """
         Подписывает данные.
 
@@ -174,19 +158,7 @@ class LibHandle:
         self.__handle_error(err_code, "SignData")
         return signed_data.value
 
-    def verify_data(
-            self,
-            in_sign: bytes,
-            in_data: bytes = b"",
-            flags: t.Iterable[SignatureFlag] = (
-                    SignatureFlag.KC_SIGN_CMS,
-                    SignatureFlag.KC_IN_BASE64,
-                    SignatureFlag.KC_IN2_BASE64,
-                    SignatureFlag.KC_DETACHED_DATA,
-                    SignatureFlag.KC_WITH_CERT,
-                    SignatureFlag.KC_OUT_BASE64,
-            ),
-    ) -> dict[str, bytes]:
+    def verify_data(self, in_sign: bytes, in_data: bytes, flags: t.Iterable[SignatureFlag]) -> dict[str, bytes]:
         """
         Обеспечивает проверку подписи.
         :param in_sign: подписанные входные данные;
@@ -241,8 +213,8 @@ class LibHandle:
     def x509_validate_certificate(
             self,
             in_cert: bytes,
-            valid_type: ValidateType = ValidateType.KC_USE_OCSP,
-            valid_path: bytes = b"http://test.pki.gov.kz/ocsp/",
+            valid_type: ValidateType,
+            valid_path: bytes,
     ) -> dict[str, bytes]:
         """
         Осуществляет проверку сертификата:
@@ -295,14 +267,7 @@ class LibHandle:
         self.__handle_error(err_code, "X509ValidateCertificate", res.get("info"))
         return res
 
-    def get_time_from_sign(
-            self,
-            in_data: bytes,
-            flags: t.Iterable[SignatureFlag] = (
-                    SignatureFlag.KC_IN_BASE64,
-                    SignatureFlag.KC_OUT_BASE64,
-            ),
-    ) -> int:
+    def get_time_from_sign(self, in_data: bytes, flags: t.Iterable[SignatureFlag]) -> int:
         """
         Получить время подписи.
         :param in_data: подпись
@@ -327,6 +292,6 @@ class LibHandle:
         self.__handle_error(err_code, "KC_GetTimeFromSig")
         return out_time.contents.value
 
-    def set_tsa_url(self, url: bytes = b"http://tsp.pki.gov.kz:80"):
+    def set_tsa_url(self, url: bytes):
         kc_url = ct.c_char_p(url)
         self.handle.KC_TSASetUrl(kc_url)

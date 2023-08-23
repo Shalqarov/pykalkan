@@ -19,9 +19,9 @@ class KalkanException(Exception):
 
 class ValidateException(KalkanException):
     def __str__(self):
-        error_message = (
-            ErrorCode(self.status).value[1]
-            if ErrorCode(self.status)
-            else f"Неизвестная ошибка: {self.status}"
-        )
+        try:
+            code = ErrorCode(self.status)
+            error_message = ErrorMessage[code.name].value
+        except ValueError:
+            error_message = f"Неизвестная ошибка: {self.status}"
         return f"Function: {self.func}; Code: {self.status}; Error: {error_message}; Info: {self.info}"

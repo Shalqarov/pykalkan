@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pykalkan"
-version = "0.6.1"
+version = "0.7.0"
 authors = [
     { name = "Shalkarov Temirlan", email = "shalqarov01@gmail.com" },
 ]

@@ -60,7 +60,7 @@ def test_validate_cert_ocsp(adapter):
     try:
         data = adapter.sign_data(DATA_TO_SIGN)
         res = adapter.verify_data(data.decode(), DATA_TO_SIGN)
-        adapter.x509_validate_certificate_ocsp(res["Cert"].decode())
+        adapter.x509_validate_certificate_ocsp(res["Cert"].decode(), "http://test.pki.gov.kz/ocsp/")
     except Exception as e:
         pytest.fail(str(e))
 

@@ -18,11 +18,14 @@ class Adapter(KalkanInterface):
             cls._instance = super(Adapter, cls).__new__(cls)
             cls._lock = threading.Lock()
             cls._instance._kc = LibHandle(lib)
-            cls._instance.init()
         return cls._instance
+
+    def __enter__(self):
+        self.init()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._kc.kc_finalize()
+        self._instance = None
 
     def init(self):
         """Инициализация библиотеки.."""

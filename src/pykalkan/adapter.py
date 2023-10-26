@@ -22,6 +22,7 @@ class Adapter(KalkanInterface):
 
     def __enter__(self):
         self.init()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._kc.kc_finalize()

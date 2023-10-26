@@ -26,12 +26,10 @@ def is_valid_date(timestamp):
 @pytest.fixture(scope="module")
 def adapter():
     try:
-        kc = Adapter(LIBRARY)
-        kc.init()
-        kc.load_key_store(CERT_PATH, CERT_PASSWORD)
-        kc.set_tsa_url()
-        yield kc
-        kc.finalize()
+        with Adapter(LIBRARY) as kc:
+            kc.load_key_store(CERT_PATH, CERT_PASSWORD)
+            kc.set_tsa_url()
+            yield kc
     except OSError as e:
         assert False, f"Adapter creation fail: {e}"
     except Exception as e:

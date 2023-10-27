@@ -36,10 +36,11 @@ from pykalkan import Adapter
 
 lib = "libkalkancryptwr-64.so"
 
-kc = Adapter(lib)
-kc.init()
-kc.load_key_store(cert_path, cert_password)
-kc.set_tsa_url()
+# Инициализация происходит в контекстном менеждере
+# При выходе из контекста происходит finalize()
+with Adapter(lib) as adapter:
+    adapter.load_key_store(CERT_PATH, CERT_PASSWORD)
+    adapter.set_tsa_url()
 ```
 
 ---

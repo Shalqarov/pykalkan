@@ -12,21 +12,7 @@ class Adapter(KalkanInterface):
     Класс, представляющий адаптер для криптографической библиотеки Kalkan.
     """
     _instance = None
-
-    def __new__(cls, lib: str):
-        if cls._instance is None:
-            cls._instance = super(Adapter, cls).__new__(cls)
-            cls._lock = threading.Lock()
-            cls._instance._kc = LibHandle(lib)
-        return cls._instance
-
-    def __enter__(self):
-        self.init()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._kc.kc_finalize()
-        self._instance = None
+    _lib = None
 
     def init(self):
         """Инициализация библиотеки.."""
@@ -54,6 +40,7 @@ class Adapter(KalkanInterface):
         """Освобождает ресурсы криптопровайдера KalkanCryptCOM и завершает работу библиотеки."""
         with self._lock:
             self._kc.kc_finalize()
+            self._instance = None
 
     def x509_export_certificate_from_store(self) -> bytes:
         """
@@ -181,3 +168,22 @@ class Adapter(KalkanInterface):
         """
         with self._lock:
             self._kc.set_tsa_url(url.encode())
+
+    def __new__(cls, lib: str):
+        if cls._instance is None:
+            _lib = lib
+            cls._instance = super(Adapter, cls).__new__(cls)
+            cls._lock = threading.Lock()
+            cls._instance._kc = LibHandle(_lib)
+        return cls._instance
+
+    def __enter__(self):
+        if self._instance is None:
+            self._instance = super(Adapter, self.__class__).__new__(self.__class__)
+            self._instance._kc = LibHandle(self._lib)
+        self.init()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._kc.kc_finalize()
+        self._instance = None

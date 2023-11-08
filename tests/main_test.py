@@ -4,7 +4,7 @@ import time
 import pytest
 from dotenv import load_dotenv
 
-from pykalkan import Adapter
+from pykalkan import *
 
 load_dotenv()
 
@@ -42,31 +42,40 @@ def test_sign_data(adapter):
         assert data is not None, "Data signing failed"
         timestamp = adapter.get_time_from_sign(data.decode())
         assert is_valid_date(timestamp), "Invalid time in signed data"
-    except Exception as e:
-        pytest.fail(str(e))
+    except exceptions.KalkanException as err:
+        pytest.fail(str(err))
 
 
 def test_verify_data(adapter):
     try:
         data = adapter.sign_data(DATA_TO_SIGN)
+    except exceptions.KalkanException as err:
+        pytest.fail(str(err))
+    try:
         adapter.verify_data(data.decode(), DATA_TO_SIGN)
-    except Exception as e:
-        pytest.fail(str(e))
+    except exceptions.ValidateException as err:
+        pytest.fail(str(err))
 
 
 def test_validate_cert_ocsp(adapter):
     try:
         data = adapter.sign_data(DATA_TO_SIGN)
+    except exceptions.KalkanException as err:
+        pytest.fail(str(err))
+    try:
         res = adapter.verify_data(data.decode(), DATA_TO_SIGN)
-        adapter.x509_validate_certificate_ocsp(res["Cert"].decode(), "http://test.pki.gov.kz/ocsp/")
-    except Exception as e:
-        pytest.fail(str(e))
+        adapter.x509_validate_certificate_ocsp(res["Cert"].decode())
+    except exceptions.ValidateException as err:
+        pytest.fail(str(err))
 
 
 def test_validate_cert_crl(adapter):
     try:
         data = adapter.sign_data(DATA_TO_SIGN)
+    except exceptions.KalkanException as err:
+        pytest.fail(str(err))
+    try:
         res = adapter.verify_data(data.decode(), DATA_TO_SIGN)
         adapter.x509_validate_certificate_crl(res["Cert"].decode(), os.getenv("CRL_PATH"))
-    except Exception as e:
-        pytest.fail(str(e))
+    except exceptions.ValidateException as err:
+        pytest.fail(str(err))

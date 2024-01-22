@@ -1,4 +1,4 @@
-import threading
+import multiprocessing
 import typing as t
 
 from pykalkan.enums import CertCode, CertProp, SignatureFlag, ValidateType
@@ -13,6 +13,25 @@ class Adapter(KalkanInterface):
     """
     _instance = None
     _lib = None
+
+    def __new__(cls, lib: str):
+        if cls._instance is None:
+            _lib = lib
+            cls._instance = super(Adapter, cls).__new__(cls)
+            cls._lock = multiprocessing.Lock()
+            cls._instance._kc = LibHandle(_lib)
+        return cls._instance
+
+    def __enter__(self):
+        if self._instance is None:
+            self._instance = super(Adapter, self.__class__).__new__(self.__class__)
+            self._instance._kc = LibHandle(self._lib)
+        self.init()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._kc.kc_finalize()
+        self._instance = None
 
     def init(self):
         """Инициализация библиотеки.."""
@@ -134,8 +153,8 @@ class Adapter(KalkanInterface):
         """
         Проверка заданного сертификата на валидность с помощью CRL.
         Осуществляет проверку сертификата:
-         - проверка срока действия;
-         - построение цепочки сертификатов;
+        - проверка срока действия;
+        - построение цепочки сертификатов;
         :param in_cert: str - Сертификат для проверки.
         :param crl_path: str - Путь к файлу CRL.
         :return: dict[str, bytes] - Словарь, содержащий результат проверки.
@@ -169,21 +188,4 @@ class Adapter(KalkanInterface):
         with self._lock:
             self._kc.set_tsa_url(url.encode())
 
-    def __new__(cls, lib: str):
-        if cls._instance is None:
-            _lib = lib
-            cls._instance = super(Adapter, cls).__new__(cls)
-            cls._lock = threading.Lock()
-            cls._instance._kc = LibHandle(_lib)
-        return cls._instance
 
-    def __enter__(self):
-        if self._instance is None:
-            self._instance = super(Adapter, self.__class__).__new__(self.__class__)
-            self._instance._kc = LibHandle(self._lib)
-        self.init()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._kc.kc_finalize()
-        self._instance = None
